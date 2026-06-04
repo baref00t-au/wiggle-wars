@@ -44,7 +44,17 @@ serializable state. This is what lets every multiplayer mode reuse identical log
 
 ```bash
 npm install
-npm test        # run the deterministic simulation suite
-npm run dev     # Vite dev server (placeholder UI until Phase 2)
+npm test            # run the deterministic simulation suite
+npm run dev         # Vite dev server
 npm run typecheck
+npm run build       # production build into dist/ (static files)
+npm run generate-icons   # regenerate PWA icons from public/icon.svg
 ```
+
+## Deploy & install
+
+`npm run build` produces a `dist/` folder of plain static files — host it anywhere
+(Netlify, GitHub Pages, a school web folder). It's a **PWA**: on Android (Chrome)
+and iPad (Safari) you can **Add to Home Screen** to install it as a full-screen,
+**offline** app (Workbox precaches the whole shell; the game makes no network
+calls). No app store, accounts, or data collection.

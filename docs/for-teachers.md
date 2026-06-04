@@ -75,6 +75,15 @@ resumes at any time. Set a higher target score for a longer tournament.
 - **No internet?** Fine — once the page has loaded, it plays fully offline.
 - **Devices:** works on locked-down Chromebooks, managed iPads, and laptops.
 
+### Install it like an app (Android & iPad)
+Wiggle Wars is an installable web app — no app store, no account needed:
+- **iPad / iPhone (Safari):** open the link → **Share** → **Add to Home Screen**.
+- **Android / Chromebook (Chrome):** open the link → menu (⋮) → **Install app** /
+  **Add to Home screen**.
+
+It then launches full-screen from the home-screen icon and **works completely
+offline** afterwards.
+
 ## A note on tone
 The aim isn't to scare students off games or to moralise — it's to hand them the
 vocabulary and the agency. A child who can say *"that's just a streak trying to
