@@ -29,12 +29,8 @@ export function renderSpotTheTricks(host: HTMLElement, back: Back): Cleanup {
     demoCleanup = null;
   };
 
-  function bar(titleText: string, onBack: () => void): HTMLElement {
-    const b = el('div', 'learn-bar');
-    const btn = el('button', 'btn small', '← Back');
-    btn.addEventListener('click', onBack);
-    b.append(btn, el('h2', 'learn-h2', titleText));
-    return b;
+  function bar(titleText: string): HTMLElement {
+    return el('h2', 'learn-h2', titleText);
   }
 
   function ageToggle(): HTMLElement {
@@ -58,7 +54,7 @@ export function renderSpotTheTricks(host: HTMLElement, back: Back): Cleanup {
   function showGrid(): void {
     clearDemo();
     host.replaceChildren();
-    host.append(bar('🔎 Spot the Tricks', back));
+    host.append(bar('🔎 Spot the Tricks'));
     host.append(el('div', 'golden', `🧭 ${GOLDEN_QUESTION}`));
     host.append(ageToggle());
 
@@ -74,14 +70,18 @@ export function renderSpotTheTricks(host: HTMLElement, back: Back): Cleanup {
 
     const quiz = el('button', 'btn primary', 'Try a quick quiz →');
     quiz.addEventListener('click', () => showQuiz(list));
-    host.append(quiz);
+    const navRow = el('div', 'learn-nav');
+    const bk = el('button', 'btn', '← Back');
+    bk.addEventListener('click', back);
+    navRow.append(bk, quiz);
+    host.append(navRow);
     host.scrollTop = 0;
   }
 
   function showDetail(t: Trick, list: Trick[]): void {
     clearDemo();
     host.replaceChildren();
-    host.append(bar(`${t.emoji} ${t.kidName}`, () => showGrid()));
+    host.append(bar(`${t.emoji} ${t.kidName}`));
     if (store.audience() === 'older') host.append(el('div', 'trick-realname', t.realName));
 
     const demo = DEMOS[t.id];
@@ -116,7 +116,7 @@ export function renderSpotTheTricks(host: HTMLElement, back: Back): Cleanup {
   function showQuiz(list: Trick[]): void {
     clearDemo();
     host.replaceChildren();
-    host.append(bar('🔎 Quick quiz', () => showGrid()));
+    host.append(bar('🔎 Quick quiz'));
     host.append(el('p', 'learn-lead', 'No score, no fail — just spotting. Match each example to its trick.'));
 
     const count = Math.min(4, list.length);

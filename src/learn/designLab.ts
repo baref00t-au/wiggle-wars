@@ -21,11 +21,7 @@ export function renderDesignLab(host: HTMLElement, back: Back): Cleanup {
   let promiseBecause = '';
 
   function topBar(title: string): HTMLElement {
-    const b = el('div', 'learn-bar');
-    const btn = el('button', 'btn small', '← Back');
-    btn.addEventListener('click', back);
-    b.append(btn, el('h2', 'learn-h2', title));
-    return b;
+    return el('h2', 'learn-h2', title);
   }
 
   function nav(canNext: boolean, nextLabel = 'Next →'): HTMLElement {

@@ -13,11 +13,7 @@ import { AiInput } from '../ai/aiInput';
 export function renderSandbox(host: HTMLElement, back: Back): Cleanup {
   host.replaceChildren();
 
-  const topBar = el('div', 'learn-bar');
-  const bbtn = el('button', 'btn small', '← Back');
-  bbtn.addEventListener('click', back);
-  topBar.append(bbtn, el('h2', 'learn-h2', '🎛 Tweak a rule'));
-  host.append(topBar);
+  host.append(el('h2', 'learn-h2', '🎛 Tweak a rule'));
   host.append(el('p', 'learn-prompt', 'Steer with ← → (or A / D). Move a slider and watch what changes.'));
 
   const canvas = el('canvas', 'sandbox-canvas');
@@ -55,9 +51,13 @@ export function renderSandbox(host: HTMLElement, back: Back): Cleanup {
   });
   host.append(controls);
 
+  const navRow = el('div', 'learn-nav');
+  const bk = el('button', 'btn', '← Back');
+  bk.addEventListener('click', back);
   const again = el('button', 'btn primary', '↻ Try again');
   again.addEventListener('click', () => rebuild());
-  host.append(again);
+  navRow.append(bk, again);
+  host.append(navRow);
 
   let loop: GameLoop | null = null;
   let input: MergedInput | null = null;

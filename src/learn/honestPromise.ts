@@ -7,11 +7,7 @@ import { HONEST_PROMISE, trickById } from './content';
 export function renderHonestPromise(host: HTMLElement, back: Back): Cleanup {
   host.replaceChildren();
 
-  const bar = el('div', 'learn-bar');
-  const btn = el('button', 'btn small', '← Back');
-  btn.addEventListener('click', back);
-  bar.append(btn, el('h2', 'learn-h2', '🤝 Our Honest Promise'));
-  host.append(bar);
+  host.append(el('h2', 'learn-h2', '🤝 Our Honest Promise'));
 
   host.append(
     el('p', 'learn-lead', 'Wiggle Wars teaches you to spot tricks — so it doesn’t use any. Here’s what we left out on purpose:'),

@@ -7,11 +7,7 @@ export function renderFunVsCantStop(host: HTMLElement, back: Back): Cleanup {
   let step = 0;
 
   function topBar(): HTMLElement {
-    const b = el('div', 'learn-bar');
-    const btn = el('button', 'btn small', '← Back');
-    btn.addEventListener('click', back);
-    b.append(btn, el('h2', 'learn-h2', '💚 Fun vs. Can’t-Stop'));
-    return b;
+    return el('h2', 'learn-h2', '💚 Fun vs. Can’t-Stop');
   }
 
   function info(title: string, lines: string[]): HTMLElement {

@@ -8,11 +8,7 @@ export function renderTrickHunt(host: HTMLElement, back: Back): Cleanup {
   let i = 0;
 
   function topBar(): HTMLElement {
-    const b = el('div', 'learn-bar');
-    const btn = el('button', 'btn small', '← Back');
-    btn.addEventListener('click', back);
-    b.append(btn, el('h2', 'learn-h2', '🌍 Trick Hunt'));
-    return b;
+    return el('h2', 'learn-h2', '🌍 Trick Hunt');
   }
 
   function show(): void {
@@ -80,7 +76,11 @@ export function renderTrickHunt(host: HTMLElement, back: Back): Cleanup {
       btns.append(x);
     }
 
-    host.append(btns, verdict, next);
+    const navRow = el('div', 'learn-nav');
+    const bk = el('button', 'btn', '← Back');
+    bk.addEventListener('click', back);
+    navRow.append(bk, next);
+    host.append(btns, verdict, navRow);
     host.scrollTop = 0;
   }
 

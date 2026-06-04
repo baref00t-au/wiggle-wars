@@ -13,11 +13,7 @@ export function renderHowItWorks(host: HTMLElement, back: Back): Cleanup {
   };
 
   function topBar(): HTMLElement {
-    const b = el('div', 'learn-bar');
-    const btn = el('button', 'btn small', '← Back');
-    btn.addEventListener('click', back);
-    b.append(btn, el('h2', 'learn-h2', '⚙️ How This Game Works'));
-    return b;
+    return el('h2', 'learn-h2', '⚙️ How This Game Works');
   }
 
   function info(title: string, lines: string[]): HTMLElement {

@@ -559,8 +559,9 @@ body {
 }
 
 .learn-h2 {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: clamp(20px, 4vw, 30px);
+  text-align: center;
 }
 
 .golden {
