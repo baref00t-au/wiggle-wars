@@ -5,7 +5,6 @@
 import { renderMenu } from './ui/menu';
 import type { MatchSetup } from './ui/menu';
 import { renderLearn } from './ui/learn';
-import { renderTeacher } from './ui/teacher';
 import { SameDeviceMode } from './modes/sameDevice';
 import { Sfx } from './audio/sfx';
 import { el } from './ui/dom';
@@ -60,17 +59,12 @@ function clearScreen(): void {
 
 function showMenu(): void {
   clearScreen();
-  cleanup = renderMenu(app!, startMatch, showLearn, showTeacher);
+  cleanup = renderMenu(app!, startMatch, showLearn);
 }
 
 function showLearn(): void {
   clearScreen();
   cleanup = renderLearn(app!, showMenu);
-}
-
-function showTeacher(): void {
-  clearScreen();
-  cleanup = renderTeacher(app!, startMatch, showMenu);
 }
 
 function startMatch(setup: MatchSetup): void {

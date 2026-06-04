@@ -7,8 +7,6 @@ export interface MatchSetup {
   players: { id: string; colorIndex: number; name: string; isAi: boolean }[];
   targetScore: number;
   difficulty: DifficultySetting;
-  /** Set when launched from Teacher Mode (class tournament). */
-  teacher?: boolean;
 }
 
 const COUNT_OPTIONS = [2, 3, 4];
@@ -30,7 +28,6 @@ export function renderMenu(
   container: HTMLElement,
   onStart: (setup: MatchSetup) => void,
   onLearn: () => void,
-  onTeacher: () => void,
 ): () => void {
   const saved = loadSettings();
   let count = saved.count;
@@ -194,11 +191,6 @@ export function renderMenu(
     learn.title = 'Spot the tricks games use, and how this one works';
     learn.addEventListener('click', onLearn);
     wrap.append(learn);
-
-    const teacher = el('button', 'btn learn-link', '👩‍🏫 Teacher Mode');
-    teacher.title = 'Run a class tournament';
-    teacher.addEventListener('click', onTeacher);
-    wrap.append(teacher);
 
     wrap.append(
       el('p', 'menu-foot', 'Keyboard or touch · add bots with 🤖 · sound off by default (top-right)'),

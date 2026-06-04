@@ -1072,29 +1072,3 @@ body {
   color: var(--fg);
 }
 
-.teacher-privacy {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: min(520px, 92vw);
-  padding: 14px 18px;
-  border-radius: 16px;
-  background: rgba(124, 252, 154, 0.1);
-  border: 1px solid #2a6b4a;
-}
-
-.teacher-lock {
-  font-size: 26px;
-}
-
-.teacher-privacy-text {
-  font-size: 15px;
-  line-height: 1.4;
-}
-
-.teacher-hint {
-  color: var(--muted);
-  font-size: 14px;
-  text-align: center;
-  max-width: 480px;
-}

@@ -15,12 +15,11 @@ example to learn from.
 
 - Open the page → **Play** → pick 2–4 players (humans and/or bots) → go.
 - Tap **📚 Learn** for the built-in lessons (no worksheets needed).
-- Tap **👩‍🏫 Teacher Mode** to run a class tournament on the projector.
 - It collects **nothing** about your students. Everything stays on the one device.
 
 ---
 
-## The three ways to use it
+## The two ways to use it
 
 ### 1. Just play (5 min energiser / brain break)
 Up to 4 on one device — keyboard (`A/D`, `←/→`, `J/L`, `Z/C`) or touch zones. Add
@@ -45,15 +44,10 @@ A full 45–60 minute lesson plan is in
 [lesson-spot-the-trick.md](lesson-spot-the-trick.md), and the design ethics it's
 built on are in [../ETHICS.md](../ETHICS.md).
 
-### 3. Teacher Mode (class tournament)
-A facilitator screen for running it on the board:
-- Set the number of players and the target score.
-- It shows a **"this game collects nothing about your students"** statement you can
-  show admin or parents.
-- **You control the pace:** each round waits for your tap or **Space** before the
-  next begins (nothing auto-starts), and **P pauses/resumes** at any time.
-- *Note:* the game itself is the same as Play — Teacher Mode adds the privacy
-  statement, a simple tournament setup, and the projecting/pause framing.
+### Running a class tournament
+Just use **Play** on the projector. You control the pace: each round waits for a
+tap or **Space** before the next begins (nothing auto-starts), and **P** pauses and
+resumes at any time. Set a higher target score for a longer tournament.
 
 ---
 
