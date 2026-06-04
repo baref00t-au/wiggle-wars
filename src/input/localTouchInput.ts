@@ -14,6 +14,9 @@ interface Rect {
   y: number;
   w: number;
   h: number;
+  /** Rotate the region 180° so it reads right-way-up for a player on the far
+   *  side of a flat tablet (the bottom-row quadrants in 4-player). */
+  flip: boolean;
 }
 
 /**
@@ -24,22 +27,23 @@ interface Rect {
 function layoutFor(n: number): Rect[] {
   if (n <= 2) {
     return [
-      { x: 0, y: 0, w: 50, h: 100 },
-      { x: 50, y: 0, w: 50, h: 100 },
+      { x: 0, y: 0, w: 50, h: 100, flip: false },
+      { x: 50, y: 0, w: 50, h: 100, flip: false },
     ].slice(0, Math.max(1, n));
   }
   if (n === 3) {
     return [
-      { x: 0, y: 0, w: 33.34, h: 100 },
-      { x: 33.33, y: 0, w: 33.34, h: 100 },
-      { x: 66.66, y: 0, w: 33.34, h: 100 },
+      { x: 0, y: 0, w: 33.34, h: 100, flip: false },
+      { x: 33.33, y: 0, w: 33.34, h: 100, flip: false },
+      { x: 66.66, y: 0, w: 33.34, h: 100, flip: false },
     ];
   }
+  // 4 players sit around the tablet — flip the bottom row for the far side.
   return [
-    { x: 0, y: 0, w: 50, h: 50 },
-    { x: 50, y: 0, w: 50, h: 50 },
-    { x: 0, y: 50, w: 50, h: 50 },
-    { x: 50, y: 50, w: 50, h: 50 },
+    { x: 0, y: 0, w: 50, h: 50, flip: false },
+    { x: 50, y: 0, w: 50, h: 50, flip: false },
+    { x: 0, y: 50, w: 50, h: 50, flip: true },
+    { x: 50, y: 50, w: 50, h: 50, flip: true },
   ];
 }
 
@@ -61,7 +65,7 @@ export class LocalTouchInput implements InputSource {
       const r = rects[i];
       this.turns.set(p.id, { left: 0, right: 0 });
 
-      const region = el('div', 'touch-region');
+      const region = el('div', `touch-region${r.flip ? ' flipped' : ''}`);
       region.style.left = `${r.x}%`;
       region.style.top = `${r.y}%`;
       region.style.width = `${r.w}%`;

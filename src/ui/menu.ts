@@ -1,5 +1,6 @@
 import { PALETTE, colorFor } from '../render/colors';
 import { el } from './dom';
+import { loadSettings, patchSettings } from '../settings';
 
 export interface MatchSetup {
   players: { id: string; colorIndex: number; name: string }[];
@@ -19,10 +20,11 @@ export function renderMenu(
   container: HTMLElement,
   onStart: (setup: MatchSetup) => void,
 ): () => void {
-  let count = 2;
-  let targetScore = 5;
-  const colorIndices = [0, 1, 2, 3];
-  const names = ['', '', '', ''];
+  const saved = loadSettings();
+  let count = saved.count;
+  let targetScore = saved.targetScore;
+  const colorIndices = [...saved.colorIndices];
+  const names = ['', '', '', '']; // nicknames are never persisted (see settings.ts)
 
   const wrap = el('div', 'menu');
   container.append(wrap);
@@ -46,6 +48,7 @@ export function renderMenu(
       if (!used.has(c)) break;
     }
     colorIndices[slot] = c;
+    patchSettings({ colorIndices });
     render();
   }
 
@@ -64,6 +67,7 @@ export function renderMenu(
       const b = el('button', `pill${n === count ? ' on' : ''}`, String(n));
       b.addEventListener('click', () => {
         count = n;
+        patchSettings({ count });
         render();
       });
       countRow.append(b);
@@ -100,6 +104,7 @@ export function renderMenu(
       const b = el('button', `pill${sc === targetScore ? ' on' : ''}`, String(sc));
       b.addEventListener('click', () => {
         targetScore = sc;
+        patchSettings({ targetScore });
         render();
       });
       scoreRow.append(b);
@@ -108,6 +113,7 @@ export function renderMenu(
 
     const start = el('button', 'btn primary start', 'Start');
     start.addEventListener('click', () => {
+      patchSettings({ count, colorIndices, targetScore });
       const players = [];
       for (let i = 0; i < count; i++) {
         const col = colorFor(colorIndices[i]);

@@ -9,7 +9,13 @@ type AudioCtor = typeof AudioContext;
 
 export class Sfx {
   private ctx: AudioContext | null = null;
-  private muted = true;
+  private muted: boolean;
+
+  /** Initial muted state only sets the flag — the AudioContext is not created
+   *  until a user gesture unlocks it (browsers require that). */
+  constructor(muted = true) {
+    this.muted = muted;
+  }
 
   get isMuted(): boolean {
     return this.muted;

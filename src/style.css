@@ -316,6 +316,12 @@ body {
   display: flex;
 }
 
+/* Far-side players (bottom row of the 4-player layout) — rotate so the arrows
+   and name read correctly from across the tablet. */
+.touch-region.flipped {
+  transform: rotate(180deg);
+}
+
 .touch-zone {
   flex: 1 1 0;
   display: flex;
