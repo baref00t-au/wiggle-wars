@@ -835,6 +835,11 @@ body {
   border-radius: 50%;
 }
 
+.score-chip .dot-glyph {
+  font-size: 14px;
+  line-height: 1;
+}
+
 .score-chip .score {
   color: var(--muted);
   min-width: 14px;

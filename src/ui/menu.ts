@@ -113,8 +113,9 @@ export function renderMenu(
       const bot = isAi[i];
       const row = el('div', 'player-row');
 
-      const chip = el('button', 'color-chip');
+      const chip = el('button', 'color-chip', col.glyph);
       chip.style.background = col.line;
+      chip.style.color = 'rgba(10, 12, 26, 0.75)';
       chip.title = 'Change colour';
       chip.addEventListener('click', () => cycleColor(i));
 

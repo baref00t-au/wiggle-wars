@@ -1,5 +1,5 @@
 import type { GameState } from '../sim/types';
-import { ARENA_BORDER, ARENA_FILL, colorFor } from './colors';
+import { ARENA_BORDER, ARENA_FILL, colorFor, type PlayerShape } from './colors';
 
 /** Death effect duration, in wall-clock ms. Driven by the clock (not sim ticks)
  *  so it still animates after the final death freezes the simulation. */
@@ -92,14 +92,12 @@ export class Renderer {
           ctx.stroke();
         }
 
-        // Glowing head.
+        // Glowing head, drawn as the player's distinct shape (a non-colour cue).
         ctx.save();
         ctx.shadowColor = color.line;
         ctx.shadowBlur = 12;
         ctx.fillStyle = color.head;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, thickness * 0.95, 0, Math.PI * 2);
-        ctx.fill();
+        this.drawShape(ctx, color.shape, p.x, p.y, thickness * 1.8);
         ctx.restore();
       } else {
         if (!this.deathSeen.has(p.id)) this.deathSeen.set(p.id, now);
@@ -111,6 +109,56 @@ export class Renderer {
     }
 
     ctx.shadowBlur = 0;
+  }
+
+  /** Fill the player's identity shape (centred at x,y, roughly radius r). */
+  private drawShape(
+    ctx: CanvasRenderingContext2D,
+    shape: PlayerShape,
+    x: number,
+    y: number,
+    r: number,
+  ): void {
+    ctx.beginPath();
+    if (shape === 'circle') {
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+    } else if (shape === 'square') {
+      ctx.rect(x - r, y - r, 2 * r, 2 * r);
+    } else if (shape === 'diamond') {
+      ctx.moveTo(x, y - r);
+      ctx.lineTo(x + r, y);
+      ctx.lineTo(x, y + r);
+      ctx.lineTo(x - r, y);
+      ctx.closePath();
+    } else if (shape === 'triangle') {
+      ctx.moveTo(x, y - r * 1.15);
+      ctx.lineTo(x + r, y + r * 0.8);
+      ctx.lineTo(x - r, y + r * 0.8);
+      ctx.closePath();
+    } else if (shape === 'hexagon') {
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI / 6 + (i * Math.PI) / 3;
+        const px = x + Math.cos(a) * r;
+        const py = y + Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    } else {
+      // star
+      const outer = r * 1.2;
+      const inner = r * 0.5;
+      for (let i = 0; i < 10; i++) {
+        const rad = i % 2 === 0 ? outer : inner;
+        const a = -Math.PI / 2 + (i * Math.PI) / 5;
+        const px = x + Math.cos(a) * rad;
+        const py = y + Math.sin(a) * rad;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    }
+    ctx.fill();
   }
 
   private drawDeathFx(

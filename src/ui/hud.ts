@@ -40,9 +40,9 @@ export class Hud {
     for (const p of state.players) {
       const col = colorFor(p.colorIndex);
       const chip = el('div', `score-chip${p.alive ? '' : ' dead'}`);
-      const dot = el('span', 'dot');
-      dot.style.background = col.line;
-      chip.append(dot, el('span', 'name', p.name));
+      const marker = el('span', 'dot-glyph', col.glyph);
+      marker.style.color = col.line;
+      chip.append(marker, el('span', 'name', p.name));
       if (aiIds?.has(p.id)) chip.append(el('span', 'ai-badge', '🤖'));
       chip.append(el('span', 'score', String(p.score)));
       this.scoreboard.append(chip);
