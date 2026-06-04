@@ -1,0 +1,20 @@
+{
+  "name": "wiggle-wars",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Browser-based, classroom-friendly multiplayer growing-line game.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "vitest": "^2.0.5"
+  }
+}
