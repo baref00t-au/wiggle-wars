@@ -186,8 +186,8 @@ export function renderMenu(
     });
     wrap.append(start);
 
-    const learn = el('button', 'btn learn-link', '🔎 Spot the Trick');
-    learn.title = 'Learn the tricks games use to keep you hooked';
+    const learn = el('button', 'btn learn-link', '📚 Learn');
+    learn.title = 'Spot the tricks games use, and how this one works';
     learn.addEventListener('click', onLearn);
     wrap.append(learn);
 

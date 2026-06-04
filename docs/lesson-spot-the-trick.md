@@ -76,11 +76,76 @@ By the end, students can:
   (attention = money), the ethics, and the regulation (loot-box bans, kids'-privacy
   laws). Extend to a design challenge: "redesign a trick into an honest feature."
 
+## More tricks (for older students)
+
+Add these six once the core five are solid (all are in the in-game **Learn → More
+Tricks** lesson):
+
+6. **The Money Door** (pay-to-win / hidden costs) — *free to play, but the good stuff
+   costs, or payers win.*
+7. **Too Far To Quit** (sunk cost) — *"you're 90% there!"* keeps you from stopping.
+8. **Always One Step Behind** (manufactured comparison) — rankings built to keep you
+   chasing.
+9. **The Constant Tap On The Shoulder** (notification bait) — pings on a schedule, not
+   because anything happened.
+10. **The Sneaky Button** (dark patterns) — the huge "YES!" and the tiny greyed "no
+    thanks." *Read before you click.*
+11. **The Slowing Treadmill** (reward inflation) — rewards rain down early, then slow
+    so you grind for the same feeling.
+
+## Part C — Broader learning threads
+
+The game is a vehicle for far more than spotting tricks. Three threads, roughly
+easiest to most ambitious. The first three are also built into the in-game **Learn**
+hub (Beyond Games, Be an Honest Designer, How Wiggle Wars Works).
+
+### Thread 1 — Media literacy across the whole digital world
+
+The trick vocabulary isn't just about games. The **same patterns** appear in social
+media (infinite scroll = endless structure; "X tagged you" = social pressure),
+shopping apps (countdown timers = scarcity; "only 2 left!"), and streaming (autoplay
+= quitting friction).
+
+*Activity:* students take three tricks they learned and hunt for them **outside**
+games — in apps, ads, websites. Share findings. The lesson: a lens for the entire
+attention economy, anchored in something they already understand.
+
+### Thread 2 — Design ethics: "Design Your Own Honest Game"
+
+Students become designers and confront the choices directly.
+
+*Activity:* in groups, propose features for a game (or for Wiggle Wars). Each must
+pass the one-line test — *"more fun, or just harder to stop?"* Then redesign one
+manipulative trick into an **honest** feature (e.g. turn a "daily streak" into an
+optional "skills you've unlocked" gallery with no penalty for not playing).
+
+*Discussion:* *why* do companies build the manipulative version? (Attention = money.)
+What's the designer's responsibility? Genuine ethics, owned by the students.
+
+### Thread 3 — STEM / how the game actually works
+
+For a computing/STEM tie-in, Wiggle Wars is a clean, visible example of real concepts:
+
+- **The game loop & determinism** — the game advances in fixed steps; same inputs
+  always give the same result. A tangible intro to simulations and reproducibility.
+- **Collision detection** — how does it know a line hit a wall or another trail?
+  Geometry made visible and playable.
+- **Multiplayer sync** — how do separate devices agree on what's happening? An
+  accessible window into networking and "single source of truth."
+- **Randomness vs. fairness** — the game uses a *seeded* random start so it's fair and
+  repeatable; contrast with the "Surprise Machine" that uses randomness to manipulate.
+  Same tool, opposite intent — a great bridge back to ethics.
+
+*Activity (advanced):* if students can read or tweak code, let them change one rule
+(line speed, turn rate, arena size) and observe the effect — connecting a line of code
+to a felt change in play.
+
 ## Optional extension — students as designers
 
 Have students propose one feature for Wiggle Wars and run it through the one-line
 test: *"Does this make it more fun, or just harder to stop?"* It turns the lesson
-into design ethics they own.
+into design ethics they own. (The in-game **Be an Honest Designer** lesson is a
+ready-made version of this.)
 
 ## A note for the teacher
 

@@ -1,28 +1,69 @@
 import { el } from './dom';
 
-// "Spot the Trick" — an in-game digital-literacy exhibit. Each of the five common
-// manipulation patterns gets a tiny, clearly-labelled FAKE demo the player can
-// poke; the moment they feel the pull it freezes and names + defuses the trick.
-// Nothing here rewards or tracks anything — it's a museum with labels. See
-// ETHICS.md and docs/lesson-spot-the-trick.md.
+// In-game "Learn" hub: short, mostly playful lessons that use Wiggle Wars as a
+// teaching vehicle. Nothing here rewards or tracks anything — the dark-pattern
+// demos are clearly-labelled fakes that immediately name + defuse themselves.
+// See ETHICS.md and docs/lesson-spot-the-trick.md.
 
-interface Trick {
-  title: string; // kid-friendly name
-  tech: string; // the real name
-  prompt: string; // "try it" line
-  /** Build the interactive demo into `stage`; call `reveal` when the trick fires.
-   *  May return a cleanup fn (e.g. to clear a timer) run when leaving the card. */
-  build: (stage: HTMLElement, reveal: () => void) => (() => void) | void;
-  why: string; // why it works on our brains
-  grownUp: string; // the "grown-up reason" (business / regulation angle)
-  doThis: string; // what you can do
-  vsWiggle: string; // how Wiggle Wars is different
+type Cleanup = (() => void) | void;
+/** Builds one slide into `host`; may return a cleanup (e.g. clear a timer). */
+type Slide = (host: HTMLElement) => Cleanup;
+
+interface Lesson {
+  icon: string;
+  title: string;
+  blurb: string;
+  slides: Slide[];
 }
 
-const TRICKS: Trick[] = [
+interface Trick {
+  title: string;
+  tech: string;
+  prompt: string;
+  build: (stage: HTMLElement, reveal: () => void) => Cleanup;
+  why: string;
+  grownUp?: string;
+  doThis: string;
+  vsWiggle: string;
+}
+
+// ---------- slide helpers ----------
+
+/** A plain content slide: heading + body paragraphs (+ optional extra builder). */
+function infoSlide(title: string, body: string[], extra?: (host: HTMLElement) => void): Slide {
+  return (host) => {
+    host.append(el('h2', 'learn-trick-title', title));
+    for (const line of body) host.append(el('p', 'learn-body', line));
+    if (extra) extra(host);
+  };
+}
+
+/** An interactive "trick" slide: poke the fake demo, then it names + defuses itself. */
+function trickSlide(t: Trick): Slide {
+  return (host) => {
+    host.append(el('h2', 'learn-trick-title', t.title));
+    host.append(el('p', 'learn-prompt', t.prompt));
+    const stage = el('div', 'demo-stage');
+    host.append(stage);
+
+    const reveal = el('div', 'reveal');
+    reveal.append(el('div', 'reveal-head', `🔍 That’s “${t.title}” (${t.tech}).`));
+    reveal.append(el('p', 'reveal-why', t.why));
+    if (t.grownUp) reveal.append(el('p', 'reveal-grownup', t.grownUp));
+    reveal.append(el('p', 'reveal-do', `💪 ${t.doThis}`));
+    reveal.append(el('p', 'reveal-wiggle', `✅ ${t.vsWiggle}`));
+    host.append(reveal);
+
+    return t.build(stage, () => reveal.classList.add('show'));
+  };
+}
+
+// ---------- the five core tricks ----------
+
+const CORE_TRICKS: Trick[] = [
   {
     title: 'The Surprise Machine',
-    tech: 'variable rewards',
+    tech: 'random rewards',
     prompt: 'Tap SPIN a few times…',
     build: (stage, reveal) => {
       let taps = 0;
@@ -31,7 +72,7 @@ const TRICKS: Trick[] = [
       const misses = ['Aw, so close!', 'Almost!', 'Try again!', 'Nearly!'];
       btn.addEventListener('click', () => {
         taps++;
-        const win = ((taps * 1103515245 + 12345) >>> 4) % 5 === 0; // pseudo, mostly loses
+        const win = ((taps * 1103515245 + 12345) >>> 4) % 5 === 0;
         result.textContent = win ? '✨ JACKPOT! ✨' : misses[taps % misses.length];
         result.classList.toggle('win', win);
         if (taps >= 3) {
@@ -142,106 +183,367 @@ const TRICKS: Trick[] = [
   },
 ];
 
+// ---------- six more tricks (for older players) ----------
+
+const MORE_TRICKS: Trick[] = [
+  {
+    title: 'The Money Door',
+    tech: 'pay-to-win / hidden costs',
+    prompt: 'Losing? There’s a shortcut…',
+    build: (stage, reveal) => {
+      const banner = el('div', 'demo-banner', 'You keep losing to players who paid 😢');
+      const btn = el('button', 'demo-big', '⭐ Buy SUPER SPEED — 💎 $4.99');
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        reveal();
+      });
+      stage.append(banner, btn);
+    },
+    why: 'When paying makes you win, the game stops being about skill. “Free” often just funnels you toward spending — and it’s usually a grown-up’s money.',
+    grownUp: 'Grown-up reason: selling power earns far more than selling the game once.',
+    doThis: 'Ask: am I being asked to pay to *win*, or just to play? Paying to win is a red flag.',
+    vsWiggle: 'Wiggle Wars sells nothing and gives no one an advantage. Everyone plays the exact same game.',
+  },
+  {
+    title: 'Too Far To Quit',
+    tech: 'sunk cost',
+    prompt: 'You’re almost there…',
+    build: (stage, reveal) => {
+      const banner = el('div', 'demo-banner', 'Level 7 — almost complete!');
+      const bar = el('div', 'demo-bar');
+      const fill = el('div', 'demo-bar-fill');
+      fill.style.width = '90%';
+      bar.append(fill);
+      const pct = el('div', 'demo-timer', '90%');
+      const finish = el('button', 'demo-big', 'Finish it! (≈30 more min)');
+      const quit = el('button', 'demo-tiny', 'quit & lose it all');
+      finish.addEventListener('click', () => {
+        banner.textContent = '…funny how it never quite finishes.';
+      });
+      quit.addEventListener('click', () => {
+        finish.disabled = quit.disabled = true;
+        reveal();
+      });
+      const row = el('div', 'demo-row');
+      row.append(finish, quit);
+      stage.append(banner, bar, pct, row);
+    },
+    why: 'Quitting when you’re “90% there” feels like wasting all your effort, so you keep going — even past the point of fun. The bar is set up to always feel almost done.',
+    grownUp: 'Grown-up reason: the “you’ve already invested so much” feeling is one of the strongest pulls there is.',
+    doThis: 'Your past time is already spent either way. Decide by “am I enjoying this *now*?”, not by the bar.',
+    vsWiggle: 'Wiggle Wars rounds are short and finish cleanly. There’s no half-done thing dragging you back.',
+  },
+  {
+    title: 'Always One Step Behind',
+    tech: 'manufactured comparison',
+    prompt: 'Check your ranking…',
+    build: (stage, reveal) => {
+      const board = el('div', 'demo-notif', '🏆 You are ranked #4,812');
+      const chase = el('div', 'demo-banner', 'So close! Beat #4,811 to climb!');
+      const btn = el('button', 'demo-big', 'Climb the ranks!');
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        reveal();
+      });
+      stage.append(board, chase, btn);
+    },
+    why: 'There’s always someone just ahead, on purpose — so you feel behind and keep grinding to catch up. The ranking is built to never let you feel “done”.',
+    grownUp: 'Grown-up reason: constant comparison keeps people playing to climb a ladder that has no top.',
+    doThis: 'Compare you-today to you-yesterday, not to a stranger’s number designed to nag you.',
+    vsWiggle: 'Wiggle Wars celebrates the round you just played with the people next to you — no global ladder.',
+  },
+  {
+    title: 'The Constant Tap On The Shoulder',
+    tech: 'notification bait',
+    prompt: 'Buzz buzz…',
+    build: (stage, reveal) => {
+      const n1 = el('div', 'demo-notif', '🔔 We miss you! Come back and play!');
+      const n2 = el('div', 'demo-notif', '🔔 Your worms are lonely without you 🥺');
+      const btn = el('button', 'demo-big', 'Open the game');
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        reveal();
+      });
+      stage.append(n1, n2, btn);
+    },
+    why: 'These pings aren’t about anything that actually happened — they’re scheduled to interrupt you and pull you back on the app’s timetable, not yours.',
+    grownUp: 'Grown-up reason: a reopened app is another chance to show ads or sell something.',
+    doThis: 'Notifications are a request, not a command. Turn off the ones that just say “come back”.',
+    vsWiggle: 'Wiggle Wars can’t ping you — no accounts, no notifications. You open it when *you* want to.',
+  },
+  {
+    title: 'The Sneaky Button',
+    tech: 'deceptive choices / dark patterns',
+    prompt: 'Pick an option…',
+    build: (stage, reveal) => {
+      const q = el('div', 'demo-banner', 'Want awesome FREE stuff?');
+      const yes = el('button', 'demo-big', 'YES! Send me EVERYTHING! 🎉');
+      const no = el('button', 'demo-tiny', 'no thanks');
+      yes.addEventListener('click', () => {
+        q.textContent = '(That huge button would’ve signed you up for loads of emails.)';
+      });
+      no.addEventListener('click', () => {
+        yes.disabled = no.disabled = true;
+        reveal();
+      });
+      const row = el('div', 'demo-row');
+      row.append(yes, no);
+      stage.append(q, row);
+    },
+    why: 'One choice is huge and bright; the other is tiny and greyed-out — so your eye and finger go to the one *they* want. It tricks you into agreeing to things you didn’t mean to.',
+    grownUp: 'Grown-up reason: nudging clicks toward “yes” boosts sign-ups and sales. It also teaches people not to read.',
+    doThis: 'When one button is shouting, slow down and read the quiet one. Read before you tap.',
+    vsWiggle: 'Wiggle Wars gives equal, clearly-labelled choices and never tries to trick your tap.',
+  },
+  {
+    title: 'The Slowing Treadmill',
+    tech: 'reward inflation',
+    prompt: 'Play a few rounds…',
+    build: (stage, reveal) => {
+      let taps = 0;
+      const coins = el('div', 'demo-result', '🪙 +100!');
+      const btn = el('button', 'demo-big', 'Play a round');
+      const amounts = ['🪙 +100!', '🪙 +20', '🪙 +5', '🪙 +1', '🪙 +1…'];
+      btn.addEventListener('click', () => {
+        taps++;
+        coins.textContent = amounts[Math.min(taps, amounts.length - 1)];
+        if (taps >= 4) {
+          btn.disabled = true;
+          reveal();
+        }
+      });
+      stage.append(coins, btn);
+    },
+    why: 'Early on, rewards pour in and it feels great. Then they quietly shrink, so you have to play (or pay) more and more to get the same buzz. It’s a treadmill that speeds up under you.',
+    grownUp: 'Grown-up reason: hook people with generosity, then make the same feeling cost more time or money.',
+    doThis: 'Notice if you’re grinding harder for less fun than you used to get. That’s the treadmill.',
+    vsWiggle: 'In Wiggle Wars a good move feels good the same way on round 1 and round 100. No bait-and-switch.',
+  },
+];
+
+// ---------- Thread 1: Beyond Games ----------
+
+const BEYOND_GAMES: Slide[] = [
+  infoSlide('🌍 These tricks are everywhere', [
+    'The tricks aren’t only in games. The very same patterns show up across your whole screen — in social apps, shops, and videos. Once you can name them, you’ll start seeing them everywhere.',
+  ]),
+  infoSlide('📱 Social media', [
+    'Infinite scroll that never ends — that’s the same “no natural finish” as an endless game.',
+    '“7 people liked your post” and “Sam tagged you” — that’s Social Pressure, pulling you back.',
+  ]),
+  infoSlide('🛒 Shopping apps', [
+    '“Only 2 left!” and “Sale ends in 09:59” — that’s Fake Scarcity, the same ticking-clock trick, made to make you buy before you think.',
+  ]),
+  infoSlide('📺 Streaming', [
+    'The next episode autoplaying in 5… 4… 3… — that’s a Sticky Exit. Stopping is made harder than just letting it roll on.',
+  ]),
+  infoSlide('🕵️ Your mission', [
+    'This week, catch THREE tricks outside games — in an app, an ad, or a website. Name each one out loud.',
+    'A lens you can use on the whole internet starts with the five tricks you already know.',
+  ]),
+];
+
+// ---------- Thread 2: Be an Honest Designer ----------
+
+function honestQuizSlide(): Slide {
+  const items = [
+    { f: 'A spinning prize wheel after every game', fun: false, why: 'Surprise Machine — random prizes to keep you spinning.' },
+    { f: 'Showing your fastest time so you can beat it', fun: true, why: 'Honest — it rewards your real skill.' },
+    { f: '“Play today or lose your 10-day streak!”', fun: false, why: 'Streak guilt — turns play into a duty.' },
+    { f: 'A big, clear “Back to menu” button', fun: true, why: 'Honest — leaving is easy and it’s your choice.' },
+    { f: '“Only 3 minutes left to play for FREE!”', fun: false, why: 'Fake scarcity — the timer is made up.' },
+  ];
+  return (host) => {
+    host.append(el('h2', 'learn-trick-title', 'More fun, or harder to stop?'));
+    host.append(el('p', 'learn-prompt', 'Tap your answer for each idea.'));
+    for (const it of items) {
+      const row = el('div', 'quiz-row');
+      row.append(el('div', 'quiz-feature', it.f));
+      const btns = el('div', 'quiz-btns');
+      const fun = el('button', 'quiz-opt', '😄 More fun');
+      const stop = el('button', 'quiz-opt', '🪤 Harder to stop');
+      const verdict = el('div', 'quiz-verdict');
+      const choose = (saidFun: boolean) => {
+        const correct = saidFun === it.fun;
+        verdict.textContent = `${correct ? '✓ ' : '✗ '}${it.why}`;
+        verdict.className = `quiz-verdict show ${correct ? 'ok' : 'no'}`;
+        fun.disabled = true;
+        stop.disabled = true;
+      };
+      fun.addEventListener('click', () => choose(true));
+      stop.addEventListener('click', () => choose(false));
+      btns.append(fun, stop);
+      row.append(btns, verdict);
+      host.append(row);
+    }
+  };
+}
+
+const HONEST_DESIGNER: Slide[] = [
+  infoSlide('✏️ You’re the designer', [
+    'Every feature in a game was a choice someone made. There’s one simple test you can use on any of them:',
+    '“Does this make the game more fun — or just harder to stop?” If it’s the second, a good designer cuts it.',
+  ]),
+  honestQuizSlide(),
+  infoSlide('🔧 Redesign a trick', [
+    'Take a trick and make it honest. Example: instead of a “daily streak” that punishes you for missing a day, show a gallery of the skills you’ve unlocked — no penalty, no pressure, just a record of getting better.',
+    'Your turn: pick a trick from the lessons and redesign it to be honest.',
+  ]),
+  infoSlide('💰 So why do companies use the tricks?', [
+    'Mostly money: more time on the app means more ads seen and more things sold. The tricks aren’t there to make the game better — they’re there to keep you on it.',
+    'A good designer earns your time by being fun, instead of trapping it. That’s the responsibility.',
+  ]),
+];
+
+// ---------- Thread 3: How Wiggle Wars Works (STEM) ----------
+
+const HOW_IT_WORKS: Slide[] = [
+  infoSlide('⚙️ Under the hood', [
+    'Wiggle Wars is also a neat example of how games and simulations really work. Here are four ideas you can actually see in it.',
+  ]),
+  infoSlide('🔁 The game loop & determinism', [
+    'The game moves in tiny fixed steps — about 60 every second. Each step takes the current picture plus your steering and makes the next picture.',
+    'Same start + same moves = exactly the same game, every time. That’s called *determinism*, and it’s how a game can be fair and even replayed.',
+  ]),
+  infoSlide('💥 Collision detection', [
+    'How does it know you crashed? Every trail is made of little line segments. Each step the game checks: is your head too close to a wall, or to any segment of any trail?',
+    'If yes — crash. That’s *collision detection*: geometry you can see and play.',
+  ]),
+  infoSlide('📡 Multiplayer & one source of truth', [
+    'If friends play on their own devices, who decides what’s real? One device becomes the “host” — the single source of truth — and everyone else shows what it says.',
+    'That’s how separate computers agree on one shared world. It’s the heart of networking.',
+  ]),
+  infoSlide('🎲 Randomness vs. fairness', [
+    'Wiggle Wars uses randomness too — for where each player starts — but it’s *seeded*: fair, and the same seed gives the same start, so nobody’s cheated.',
+    'Notice: the Surprise Machine also uses randomness — but to manipulate you. Same tool, opposite intent. The question is always: is it used FOR you, or AGAINST you?',
+  ]),
+];
+
+// ---------- the hub ----------
+
+const LESSONS: Lesson[] = [
+  {
+    icon: '🔎',
+    title: 'Spot the Trick',
+    blurb: 'The 5 tricks games use to keep you hooked.',
+    slides: [
+      infoSlide('🔎 Spot the Trick', [
+        'Some games are fun AND secretly designed to be hard to stop — two different things. Here are five tricks. Poke each one, then we’ll name it. Once you can name a trick, it stops working on you.',
+      ]),
+      ...CORE_TRICKS.map(trickSlide),
+      infoSlide('🎉 You can spot all five!', [
+        'Wiggle Wars has NONE of these tricks — and it’s still fun. So a good game doesn’t need them: the tricks aren’t there to make a game more fun, they’re there to make it harder to stop.',
+        'Naming a trick is what disarms it.',
+      ]),
+    ],
+  },
+  {
+    icon: '🕵️',
+    title: 'More Tricks',
+    blurb: 'Six sneakier ones, for older players.',
+    slides: [
+      infoSlide('🕵️ Six more tricks', [
+        'Ready for the trickier ones? These show up more in big online games and apps. Same idea: poke each demo, then we name it.',
+      ]),
+      ...MORE_TRICKS.map(trickSlide),
+      infoSlide('🧠 Now you know eleven', [
+        'Surprise Machine, Hurry Or Miss Out, streaks, social pressure, sticky exits — plus money doors, sunk cost, comparison, notification bait, sneaky buttons, and the slowing treadmill.',
+        'That’s most of the toolkit. You’ll spot these for the rest of your life now.',
+      ]),
+    ],
+  },
+  {
+    icon: '🌍',
+    title: 'Beyond Games',
+    blurb: 'The same tricks in apps, shops & videos.',
+    slides: BEYOND_GAMES,
+  },
+  {
+    icon: '✏️',
+    title: 'Be an Honest Designer',
+    blurb: 'Spot good vs sneaky design — and fix it.',
+    slides: HONEST_DESIGNER,
+  },
+  {
+    icon: '⚙️',
+    title: 'How Wiggle Wars Works',
+    blurb: 'The game loop, collisions & fairness.',
+    slides: HOW_IT_WORKS,
+  },
+];
+
 export function renderLearn(container: HTMLElement, onExit: () => void): () => void {
   const wrap = el('div', 'learn');
   container.append(wrap);
 
-  let step = 0; // 0 = intro, 1..N = tricks, N+1 = outro
-  let demoCleanup: (() => void) | null = null;
-
-  function clearDemo(): void {
-    if (demoCleanup) {
-      demoCleanup();
-      demoCleanup = null;
-    }
+  let slideCleanup: (() => void) | null = null;
+  function clearSlide(): void {
+    if (slideCleanup) slideCleanup();
+    slideCleanup = null;
   }
 
-  function go(next: number): void {
-    step = next;
-    render();
-  }
-
-  function navRow(backLabel: string, nextLabel: string): HTMLElement {
-    const row = el('div', 'learn-nav');
-    const back = el('button', 'btn', backLabel);
-    back.addEventListener('click', () => go(step - 1));
-    const next = el('button', 'btn primary', nextLabel);
-    next.addEventListener('click', () => go(step + 1));
-    row.append(back, next);
-    return row;
-  }
-
-  function renderIntro(): void {
-    wrap.replaceChildren(
-      el('h1', 'learn-title', '🔎 Spot the Trick'),
-      el(
-        'p',
-        'learn-lead',
-        'Some games are fun AND secretly designed to be hard to stop — those are two different things. Here are five tricks games use. Poke each one, then we’ll name it. Once you can name a trick, it stops working on you.',
-      ),
+  function showHub(): void {
+    clearSlide();
+    wrap.replaceChildren();
+    wrap.append(el('h1', 'learn-title', '📚 Learn'));
+    wrap.append(
+      el('p', 'learn-lead', 'Wiggle Wars is fun — and it can teach you a few things too. Pick a topic.'),
     );
-    const row = el('div', 'learn-nav');
+    const list = el('div', 'lesson-list');
+    for (const lesson of LESSONS) {
+      const b = el('button', 'lesson-btn');
+      b.append(
+        el('span', 'lesson-icon', lesson.icon),
+        el('span', 'lesson-name', lesson.title),
+        el('span', 'lesson-blurb', lesson.blurb),
+      );
+      b.addEventListener('click', () => runLesson(lesson));
+      list.append(b);
+    }
+    wrap.append(list);
     const back = el('button', 'btn', '← Menu');
     back.addEventListener('click', onExit);
-    const next = el('button', 'btn primary', 'Start →');
-    next.addEventListener('click', () => go(1));
-    row.append(back, next);
-    wrap.append(row);
-  }
-
-  function renderTrick(trick: Trick, index: number): void {
-    wrap.replaceChildren();
-    wrap.append(el('div', 'learn-step', `Trick ${index + 1} of ${TRICKS.length}`));
-    wrap.append(el('h2', 'learn-trick-title', trick.title));
-    wrap.append(el('p', 'learn-prompt', trick.prompt));
-
-    const stage = el('div', 'demo-stage');
-    wrap.append(stage);
-
-    const reveal = el('div', 'reveal');
-    reveal.append(el('div', 'reveal-head', `🔍 That’s “${trick.title}” (${trick.tech}).`));
-    reveal.append(el('p', 'reveal-why', trick.why));
-    reveal.append(el('p', 'reveal-grownup', trick.grownUp));
-    reveal.append(el('p', 'reveal-do', `💪 What you can do: ${trick.doThis}`));
-    reveal.append(el('p', 'reveal-wiggle', `✅ ${trick.vsWiggle}`));
-    wrap.append(reveal);
-
-    const result = trick.build(stage, () => reveal.classList.add('show'));
-    demoCleanup = typeof result === 'function' ? result : null;
-
-    const isLast = index === TRICKS.length - 1;
-    wrap.append(navRow('← Back', isLast ? 'Done →' : 'Next trick →'));
-  }
-
-  function renderOutro(): void {
-    wrap.replaceChildren(
-      el('h1', 'learn-title', '🎉 You can spot all five!'),
-      el(
-        'p',
-        'learn-lead',
-        'Wiggle Wars has NONE of these tricks — and it’s still fun. So a good game doesn’t need them: the tricks aren’t there to make a game more fun, they’re there to make it harder to stop. Naming a trick is what disarms it.',
-      ),
-    );
-    const row = el('div', 'learn-nav');
-    const back = el('button', 'btn', '← Back');
-    back.addEventListener('click', () => go(step - 1));
-    const done = el('button', 'btn primary', 'Back to menu');
-    done.addEventListener('click', onExit);
-    row.append(back, done);
-    wrap.append(row);
-  }
-
-  function render(): void {
-    clearDemo();
-    if (step <= 0) renderIntro();
-    else if (step <= TRICKS.length) renderTrick(TRICKS[step - 1], step - 1);
-    else renderOutro();
+    wrap.append(back);
     wrap.scrollTop = 0;
   }
 
-  render();
+  function runLesson(lesson: Lesson): void {
+    let i = 0;
+    const renderSlide = (): void => {
+      clearSlide();
+      wrap.replaceChildren();
+      wrap.append(el('div', 'learn-step', `${lesson.title} · ${i + 1}/${lesson.slides.length}`));
+      const host = el('div', 'learn-slide');
+      wrap.append(host);
+      slideCleanup = lesson.slides[i](host) || null;
+
+      const nav = el('div', 'learn-nav');
+      const back = el('button', 'btn', i === 0 ? '← Topics' : '← Back');
+      back.addEventListener('click', () => {
+        if (i === 0) showHub();
+        else {
+          i--;
+          renderSlide();
+        }
+      });
+      const next = el('button', 'btn primary', i === lesson.slides.length - 1 ? 'Done ✓' : 'Next →');
+      next.addEventListener('click', () => {
+        if (i === lesson.slides.length - 1) showHub();
+        else {
+          i++;
+          renderSlide();
+        }
+      });
+      nav.append(back, next);
+      wrap.append(nav);
+      wrap.scrollTop = 0;
+    };
+    renderSlide();
+  }
+
+  showHub();
   return () => {
-    clearDemo();
+    clearSlide();
     wrap.remove();
   };
 }
