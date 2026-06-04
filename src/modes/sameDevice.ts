@@ -36,8 +36,8 @@ export class SameDeviceMode {
   private loop: GameLoop;
   private aiIds: Set<string>;
   private humanIds: Set<string>;
-  private quitBtn: HTMLButtonElement | null = null;
   private disposed = false;
+  private wasFullscreen = false;
 
   private seed: number;
   private phase: Phase = 'running';
@@ -96,17 +96,15 @@ export class SameDeviceMode {
     this.fit();
     window.addEventListener('resize', this.fit);
     document.addEventListener('keydown', this.onKey);
+    document.addEventListener('fullscreenchange', this.onFullscreenChange);
     this.container.addEventListener('pointerdown', this.onPointer);
 
-    // An always-visible, frictionless way out (see ETHICS.md). Esc does the same.
-    this.quitBtn = el('button', 'quit-btn', '☰ Menu');
-    this.quitBtn.title = 'Back to menu (Esc)';
-    this.quitBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.dispose();
-      this.onExit();
-    });
-    this.container.append(this.quitBtn);
+    // Go fullscreen for distraction-free play (best-effort; the Start click is the
+    // user gesture browsers require). Leaving fullscreen — via Esc or a device
+    // gesture — returns to the menu (see onFullscreenChange), so Esc still "gets
+    // you out" and touch users have a way back too.
+    const root = document.documentElement;
+    if (root.requestFullscreen) root.requestFullscreen().catch(() => {});
 
     this.loop.start();
 
@@ -118,15 +116,31 @@ export class SameDeviceMode {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    // Remove the fullscreen listener BEFORE exiting, so our own exit doesn't
+    // bounce back through onFullscreenChange.
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
     this.loop.stop();
     window.removeEventListener('resize', this.fit);
     document.removeEventListener('keydown', this.onKey);
     this.container.removeEventListener('pointerdown', this.onPointer);
     this.input.dispose();
     this.hud.dispose();
-    this.quitBtn?.remove();
     this.canvas.remove();
   }
+
+  /** Return to the menu (idempotent). Exits fullscreen as part of dispose(). */
+  private quit(): void {
+    if (this.disposed) return;
+    this.dispose();
+    this.onExit();
+  }
+
+  private onFullscreenChange = (): void => {
+    const isFs = document.fullscreenElement !== null;
+    if (this.wasFullscreen && !isFs) this.quit(); // user left fullscreen → menu
+    this.wasFullscreen = isFs;
+  };
 
   private config() {
     return makeConfig({ targetScore: this.setup.targetScore });
@@ -141,8 +155,7 @@ export class SameDeviceMode {
   private onKey = (e: KeyboardEvent): void => {
     if (e.key === 'Escape') {
       e.preventDefault();
-      this.dispose();
-      this.onExit();
+      this.quit();
       return;
     }
     if (e.key === ' ' || e.key === 'Enter') {
@@ -273,13 +286,7 @@ export class SameDeviceMode {
       celebrate: true,
       buttons: [
         { label: 'Play again', primary: true, onClick: () => this.rematch() },
-        {
-          label: 'New game',
-          onClick: () => {
-            this.dispose();
-            this.onExit();
-          },
-        },
+        { label: 'New game', onClick: () => this.quit() },
       ],
     });
   }

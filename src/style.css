@@ -721,20 +721,3 @@ body {
   cursor: pointer;
   pointer-events: auto;
 }
-
-.quit-btn {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 20;
-  height: 44px;
-  padding: 0 14px;
-  border-radius: 12px;
-  border: 2px solid #2c3157;
-  background: var(--panel);
-  color: var(--fg);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  pointer-events: auto;
-}

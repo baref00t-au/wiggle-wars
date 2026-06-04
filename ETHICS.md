@@ -37,8 +37,9 @@ strict. This file is a hard checklist for anyone who touches the code later.
 - **No social pressure.** No accounts, no logins, no network in local play, no
   notifications. Play is face-to-face with people in the room.
 - **Frictionless quitting.** Rounds never auto-start — they wait for a tap or Space.
-  A visible **Menu** button (and the **Esc** key) returns to the menu at any time.
-  Matches end at the target score and stop at a calm results screen.
+  Pressing **Esc** (or simply leaving fullscreen) returns to the menu at any time,
+  and the results screen has a clear **New game**. Matches end at the target score
+  and stop at a calm results screen. Nothing fights you on the way out.
 - **Short, finite matches.** Rounds last seconds; the match ends; you choose whether
   to play again.
 - **No money, no advantage for sale.** The game is free and unmonetised; if that ever
