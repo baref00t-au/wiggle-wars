@@ -76,7 +76,7 @@ export class GameLoop {
     this.accumulator += elapsed;
 
     // Sample input once per frame; held steering is constant between frames.
-    const inputs = this.input.getInputs();
+    const inputs = this.input.getInputs(this.state);
     while (this.accumulator >= this.stepMs) {
       this.state = step(this.state, inputs);
       this.accumulator -= this.stepMs;

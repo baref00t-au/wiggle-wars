@@ -142,12 +142,35 @@ body {
   border-color: var(--accent);
 }
 
+.type-btn {
+  flex: 0 0 auto;
+  min-width: 86px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 2px solid #2c3157;
+  background: rgba(10, 11, 22, 0.7);
+  color: var(--fg);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.type-btn.ai {
+  border-color: #cc79a7;
+  background: rgba(204, 121, 167, 0.18);
+}
+
 .key-hint {
   flex: 0 0 auto;
-  min-width: 64px;
+  min-width: 56px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 14px;
   text-align: center;
+}
+
+.ai-badge {
+  font-size: 13px;
+  margin-left: -2px;
 }
 
 .menu-foot {

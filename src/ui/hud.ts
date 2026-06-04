@@ -34,7 +34,7 @@ export class Hud {
     container.append(this.root);
   }
 
-  renderScores(state: GameState): void {
+  renderScores(state: GameState, aiIds?: Set<string>): void {
     this.scoreboard.replaceChildren();
     this.scoreboard.append(el('div', 'target', `First to ${state.config.targetScore}`));
     for (const p of state.players) {
@@ -42,7 +42,9 @@ export class Hud {
       const chip = el('div', `score-chip${p.alive ? '' : ' dead'}`);
       const dot = el('span', 'dot');
       dot.style.background = col.line;
-      chip.append(dot, el('span', 'name', p.name), el('span', 'score', String(p.score)));
+      chip.append(dot, el('span', 'name', p.name));
+      if (aiIds?.has(p.id)) chip.append(el('span', 'ai-badge', '🤖'));
+      chip.append(el('span', 'score', String(p.score)));
       this.scoreboard.append(chip);
     }
   }

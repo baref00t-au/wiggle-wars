@@ -3,7 +3,7 @@ import { el } from './dom';
 import { loadSettings, patchSettings } from '../settings';
 
 export interface MatchSetup {
-  players: { id: string; colorIndex: number; name: string }[];
+  players: { id: string; colorIndex: number; name: string; isAi: boolean }[];
   targetScore: number;
 }
 
@@ -12,9 +12,9 @@ const SCORE_OPTIONS = [3, 5, 10];
 const KEY_HINTS = ['A / D', '← / →', 'J / L', 'Z / C'];
 
 /**
- * The start screen: pick how many players, each a colour + optional nickname,
- * and the target score. No data is stored anywhere — names live only in memory
- * for this match. Returns a dispose function.
+ * The start screen: pick how many players, each a colour + optional nickname +
+ * whether it's a human or a bot (at least one human required), and the target
+ * score. Settings persist locally; nicknames never do. Returns a dispose function.
  */
 export function renderMenu(
   container: HTMLElement,
@@ -24,10 +24,17 @@ export function renderMenu(
   let count = saved.count;
   let targetScore = saved.targetScore;
   const colorIndices = [...saved.colorIndices];
+  const isAi = [...saved.ai];
   const names = ['', '', '', '']; // nicknames are never persisted (see settings.ts)
 
   const wrap = el('div', 'menu');
   container.append(wrap);
+
+  function humanCount(): number {
+    let n = 0;
+    for (let i = 0; i < count; i++) if (!isAi[i]) n++;
+    return n;
+  }
 
   function ensureDistinctColors(): void {
     const used = new Set<number>();
@@ -37,6 +44,10 @@ export function renderMenu(
       colorIndices[i] = c;
       used.add(c);
     }
+  }
+
+  function ensureAtLeastOneHuman(): void {
+    if (humanCount() === 0) isAi[0] = false;
   }
 
   function cycleColor(slot: number): void {
@@ -52,8 +63,20 @@ export function renderMenu(
     render();
   }
 
+  function toggleAi(slot: number): void {
+    if (!isAi[slot]) {
+      if (humanCount() <= 1) return; // keep at least one human
+      isAi[slot] = true;
+    } else {
+      isAi[slot] = false;
+    }
+    patchSettings({ ai: isAi.slice() });
+    render();
+  }
+
   function render(): void {
     ensureDistinctColors();
+    ensureAtLeastOneHuman();
     wrap.replaceChildren();
 
     wrap.append(el('h1', 'menu-title', 'Wiggle Wars'));
@@ -77,6 +100,7 @@ export function renderMenu(
     const list = el('div', 'player-list');
     for (let i = 0; i < count; i++) {
       const col = colorFor(colorIndices[i]);
+      const bot = isAi[i];
       const row = el('div', 'player-row');
 
       const chip = el('button', 'color-chip');
@@ -89,11 +113,16 @@ export function renderMenu(
       input.maxLength = 12;
       input.placeholder = col.name;
       input.value = names[i];
+      input.disabled = bot;
       input.addEventListener('input', () => {
         names[i] = input.value;
       });
 
-      row.append(chip, input, el('span', 'key-hint', KEY_HINTS[i] ?? ''));
+      const typeBtn = el('button', `type-btn ${bot ? 'ai' : 'human'}`, bot ? '🤖 Bot' : '🧑 You');
+      typeBtn.title = 'Human or computer';
+      typeBtn.addEventListener('click', () => toggleAi(i));
+
+      row.append(chip, input, typeBtn, el('span', 'key-hint', bot ? 'auto' : KEY_HINTS[i]));
       list.append(row);
     }
     wrap.append(list);
@@ -113,7 +142,7 @@ export function renderMenu(
 
     const start = el('button', 'btn primary start', 'Start');
     start.addEventListener('click', () => {
-      patchSettings({ count, colorIndices, targetScore });
+      patchSettings({ count, colorIndices, targetScore, ai: isAi.slice() });
       const players = [];
       for (let i = 0; i < count; i++) {
         const col = colorFor(colorIndices[i]);
@@ -121,6 +150,7 @@ export function renderMenu(
           id: `p${i + 1}`,
           colorIndex: colorIndices[i],
           name: names[i].trim() || col.name,
+          isAi: isAi[i],
         });
       }
       onStart({ players, targetScore });
@@ -128,7 +158,7 @@ export function renderMenu(
     wrap.append(start);
 
     wrap.append(
-      el('p', 'menu-foot', 'Keyboard or touch · sound is off by default (top-right)'),
+      el('p', 'menu-foot', 'Keyboard or touch · add bots with 🤖 · sound off by default (top-right)'),
     );
   }
 

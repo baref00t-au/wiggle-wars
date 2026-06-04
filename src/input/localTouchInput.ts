@@ -25,11 +25,16 @@ interface Rect {
  * Zones are deliberately large and obvious — kids, fast fingers.
  */
 function layoutFor(n: number): Rect[] {
-  if (n <= 2) {
+  if (n <= 1) {
+    // Solo human (the rest are bots) gets the whole screen: left half turns
+    // left, right half turns right.
+    return [{ x: 0, y: 0, w: 100, h: 100, flip: false }];
+  }
+  if (n === 2) {
     return [
       { x: 0, y: 0, w: 50, h: 100, flip: false },
       { x: 50, y: 0, w: 50, h: 100, flip: false },
-    ].slice(0, Math.max(1, n));
+    ];
   }
   if (n === 3) {
     return [

@@ -9,6 +9,8 @@ export interface StoredSettings {
   count: number;
   colorIndices: number[];
   targetScore: number;
+  /** Per-slot: true = computer-controlled. */
+  ai: boolean[];
 }
 
 const KEY = 'wiggle-wars:v1';
@@ -18,6 +20,7 @@ const DEFAULTS: StoredSettings = {
   count: 2,
   colorIndices: [0, 1, 2, 3],
   targetScore: 5,
+  ai: [false, false, false, false],
 };
 
 function clampCount(n: unknown): number {
@@ -39,6 +42,10 @@ export function loadSettings(): StoredSettings {
           : [...DEFAULTS.colorIndices],
       targetScore:
         typeof parsed.targetScore === 'number' ? parsed.targetScore : DEFAULTS.targetScore,
+      ai:
+        Array.isArray(parsed.ai) && parsed.ai.length >= 4
+          ? parsed.ai.slice(0, 4).map(Boolean)
+          : [...DEFAULTS.ai],
     };
   } catch {
     return { ...DEFAULTS };

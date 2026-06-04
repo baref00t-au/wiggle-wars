@@ -5,6 +5,7 @@ import { colorFor } from '../render/colors';
 import { DEFAULT_BINDINGS, LocalKeyboardInput } from '../input/localKeyboardInput';
 import { LocalTouchInput } from '../input/localTouchInput';
 import { MergedInput } from '../input/mergedInput';
+import { AiInput } from '../ai/aiInput';
 import { GameLoop } from './gameLoop';
 import { Hud } from '../ui/hud';
 import { el } from '../ui/dom';
@@ -30,8 +31,10 @@ export class SameDeviceMode {
   private hud: Hud;
   private keyboard: LocalKeyboardInput;
   private touch: LocalTouchInput;
+  private ai: AiInput;
   private input: MergedInput;
   private loop: GameLoop;
+  private aiIds: Set<string>;
 
   private seed: number;
   private phase: Phase = 'running';
@@ -54,15 +57,24 @@ export class SameDeviceMode {
     this.canvas.id = 'game';
     container.append(this.canvas);
 
-    const state = createInitialState(this.config(), this.specs(), this.seed);
+    const config = this.config();
+    const state = createInitialState(config, this.specs(), this.seed);
 
     this.renderer = new Renderer(this.canvas, state.config.arenaWidth, state.config.arenaHeight);
     this.hud = new Hud(container);
 
-    const ids = new Set(setup.players.map((p) => p.id));
-    this.keyboard = new LocalKeyboardInput(DEFAULT_BINDINGS.filter((b) => ids.has(b.playerId)));
-    this.touch = new LocalTouchInput(container, this.specs());
-    this.input = new MergedInput([this.keyboard, this.touch]);
+    const humans = setup.players.filter((p) => !p.isAi);
+    const bots = setup.players.filter((p) => p.isAi);
+    this.aiIds = new Set(bots.map((p) => p.id));
+
+    const humanIds = new Set(humans.map((p) => p.id));
+    this.keyboard = new LocalKeyboardInput(DEFAULT_BINDINGS.filter((b) => humanIds.has(b.playerId)));
+    this.touch = new LocalTouchInput(
+      container,
+      humans.map((p) => ({ id: p.id, colorIndex: p.colorIndex, name: p.name })),
+    );
+    this.ai = new AiInput(bots.map((p) => p.id), config);
+    this.input = new MergedInput([this.keyboard, this.touch, this.ai]);
 
     this.loop = new GameLoop({
       initialState: state,
@@ -148,7 +160,7 @@ export class SameDeviceMode {
   }
 
   private onRender(state: GameState): void {
-    this.hud.renderScores(state);
+    this.hud.renderScores(state, this.aiIds);
 
     // Death sounds: anyone alive last frame but not now.
     const aliveNow = new Set(state.players.filter((p) => p.alive).map((p) => p.id));
