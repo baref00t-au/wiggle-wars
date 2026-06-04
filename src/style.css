@@ -767,6 +767,41 @@ body {
   color: var(--muted);
 }
 
+/* tweak sandbox */
+.sandbox-canvas {
+  width: min(560px, 92vw);
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  border: 2px solid #2c3157;
+  background: var(--bg);
+  display: block;
+  touch-action: none;
+}
+
+.sandbox-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(560px, 92vw);
+}
+
+.slider-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.slider-label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

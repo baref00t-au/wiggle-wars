@@ -1,10 +1,16 @@
 import { el, type Back, type Cleanup } from './kit';
+import { renderSandbox } from './sandbox';
 
 // 3.5 How This Game Works — a peek at the real tech, using Wiggle Wars itself as
-// the example. (The "tweak a rule" sandbox is added in a later step.)
+// the example, ending in a live "tweak a rule" sandbox.
 
 export function renderHowItWorks(host: HTMLElement, back: Back): Cleanup {
   let step = 0;
+  let sub: (() => void) | null = null;
+  const clearSub = (): void => {
+    if (sub) sub();
+    sub = null;
+  };
 
   function topBar(): HTMLElement {
     const b = el('div', 'learn-bar');
@@ -48,10 +54,26 @@ export function renderHowItWorks(host: HTMLElement, back: Back): Cleanup {
       ]),
   ];
 
+  function openSandbox(): void {
+    clearSub();
+    host.replaceChildren();
+    const c = renderSandbox(host, render);
+    sub = typeof c === 'function' ? c : null;
+  }
+
   function render(): void {
+    clearSub();
     host.replaceChildren();
     host.append(topBar());
     host.append(slides[step]());
+
+    const last = step === slides.length - 1;
+    if (last) {
+      const sb = el('button', 'btn', '🎛 Open the tweak sandbox');
+      sb.addEventListener('click', openSandbox);
+      host.append(sb);
+    }
+
     const nav = el('div', 'learn-nav');
     const b = el('button', 'btn', '← Back');
     b.addEventListener('click', () => {
@@ -61,9 +83,9 @@ export function renderHowItWorks(host: HTMLElement, back: Back): Cleanup {
         render();
       }
     });
-    const n = el('button', 'btn primary', step === slides.length - 1 ? 'Done ✓' : 'Next →');
+    const n = el('button', 'btn primary', last ? 'Done ✓' : 'Next →');
     n.addEventListener('click', () => {
-      if (step === slides.length - 1) back();
+      if (last) back();
       else {
         step++;
         render();
@@ -75,4 +97,5 @@ export function renderHowItWorks(host: HTMLElement, back: Back): Cleanup {
   }
 
   render();
+  return () => clearSub();
 }
