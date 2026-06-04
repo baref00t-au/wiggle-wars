@@ -4,7 +4,7 @@
 // All access is wrapped in try/catch because locked-down school devices / private
 // mode can make localStorage throw or be absent; we silently fall back to defaults.
 
-import type { Difficulty } from './ai/aiInput';
+import type { DifficultySetting } from './ai/aiInput';
 
 export interface StoredSettings {
   muted: boolean;
@@ -13,12 +13,12 @@ export interface StoredSettings {
   targetScore: number;
   /** Per-slot: true = computer-controlled. */
   ai: boolean[];
-  /** Difficulty shared by all bots. */
-  difficulty: Difficulty;
+  /** Difficulty shared by all bots ('auto' rubber-bands to the player). */
+  difficulty: DifficultySetting;
 }
 
 const KEY = 'wiggle-wars:v1';
-const DIFFICULTIES: Difficulty[] = ['easy', 'normal', 'hard'];
+const DIFFICULTIES: DifficultySetting[] = ['easy', 'normal', 'hard', 'auto'];
 
 const DEFAULTS: StoredSettings = {
   muted: true,

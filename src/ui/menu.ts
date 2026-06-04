@@ -1,20 +1,21 @@
 import { PALETTE, colorFor } from '../render/colors';
 import { el } from './dom';
 import { loadSettings, patchSettings } from '../settings';
-import type { Difficulty } from '../ai/aiInput';
+import type { DifficultySetting } from '../ai/aiInput';
 
 export interface MatchSetup {
   players: { id: string; colorIndex: number; name: string; isAi: boolean }[];
   targetScore: number;
-  difficulty: Difficulty;
+  difficulty: DifficultySetting;
 }
 
 const COUNT_OPTIONS = [2, 3, 4];
 const SCORE_OPTIONS = [3, 5, 10];
-const DIFFICULTY_OPTIONS: { value: Difficulty; label: string }[] = [
+const DIFFICULTY_OPTIONS: { value: DifficultySetting; label: string }[] = [
   { value: 'easy', label: 'Easy' },
   { value: 'normal', label: 'Normal' },
   { value: 'hard', label: 'Hard' },
+  { value: 'auto', label: 'Auto' },
 ];
 const KEY_HINTS = ['A / D', '← / →', 'J / L', 'Z / C'];
 
@@ -148,6 +149,10 @@ export function renderMenu(
         diffRow.append(b);
       }
       wrap.append(diffRow);
+
+      if (difficulty === 'auto') {
+        wrap.append(el('p', 'menu-hint', 'Auto adjusts the bots to how you’re doing.'));
+      }
     }
 
     const scoreRow = el('div', 'option-row');

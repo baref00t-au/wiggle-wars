@@ -35,6 +35,7 @@ export class SameDeviceMode {
   private input: MergedInput;
   private loop: GameLoop;
   private aiIds: Set<string>;
+  private humanIds: Set<string>;
 
   private seed: number;
   private phase: Phase = 'running';
@@ -51,7 +52,9 @@ export class SameDeviceMode {
     private sfx: Sfx,
     private onExit: () => void,
   ) {
-    this.seed = 1 + setup.players.length;
+    // Random starting seed so every match spawns differently. The mode (unlike
+    // the sim) may use Math.random; the sim stays deterministic for this seed.
+    this.seed = 1 + Math.floor(Math.random() * 0x7fffffff);
 
     this.canvas = el('canvas', 'game');
     this.canvas.id = 'game';
@@ -66,6 +69,7 @@ export class SameDeviceMode {
     const humans = setup.players.filter((p) => !p.isAi);
     const bots = setup.players.filter((p) => p.isAi);
     this.aiIds = new Set(bots.map((p) => p.id));
+    this.humanIds = new Set(humans.map((p) => p.id));
 
     const humanIds = new Set(humans.map((p) => p.id));
     this.keyboard = new LocalKeyboardInput(DEFAULT_BINDINGS.filter((b) => humanIds.has(b.playerId)));
@@ -119,6 +123,12 @@ export class SameDeviceMode {
   private fit = (): void => this.renderer.resize();
 
   private onKey = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this.dispose();
+      this.onExit();
+      return;
+    }
     if (e.key === ' ' || e.key === 'Enter') {
       if (this.tryAdvance()) e.preventDefault();
     }
@@ -189,6 +199,19 @@ export class SameDeviceMode {
         this.roundEndHandled = true;
         this.advanceReadyAt = now + ADVANCE_DELAY_MS;
         this.touch.setVisible(false);
+
+        // Auto difficulty: rubber-band toward the human's level each round.
+        let adaptNote: string | undefined;
+        if (this.ai.isAdaptive) {
+          const humanLife = this.bestLife(this.humanIds, state);
+          const botLife = this.bestLife(this.aiIds, state);
+          if (humanLife !== botLife) {
+            const dir = this.ai.nudgeSkill(humanLife > botLife);
+            if (dir === 'up') adaptNote = 'The bots are getting tougher!';
+            else if (dir === 'down') adaptNote = 'The bots eased off a little.';
+          }
+        }
+
         if (state.matchWinnerId) {
           this.phase = 'matchOver';
           this.sfx.play('matchWin');
@@ -196,7 +219,7 @@ export class SameDeviceMode {
         } else {
           this.phase = 'roundOver';
           this.sfx.play('roundWin');
-          this.showRoundOver(state);
+          this.showRoundOver(state, adaptNote);
         }
       }
     }
@@ -204,13 +227,26 @@ export class SameDeviceMode {
     this.prevStatus = state.status;
   }
 
-  private showRoundOver(state: GameState): void {
+  private showRoundOver(state: GameState, note?: string): void {
     const winner = state.players.find((p) => p.id === state.roundWinnerId);
     this.hud.showMessage({
       title: winner ? `${winner.name} wins the round!` : 'Draw!',
       titleColor: winner ? colorFor(winner.colorIndex).head : undefined,
-      subtitle: 'Tap or press Space for the next round',
+      subtitle: note
+        ? `${note} · Tap or Space to continue`
+        : 'Tap or press Space for the next round',
     });
+  }
+
+  /** Longest-lived player among `ids` this round (Infinity if one survived). */
+  private bestLife(ids: Set<string>, state: GameState): number {
+    let best = -1;
+    for (const p of state.players) {
+      if (!ids.has(p.id)) continue;
+      const life = p.alive ? Number.POSITIVE_INFINITY : p.diedAtTick ?? 0;
+      if (life > best) best = life;
+    }
+    return best;
   }
 
   private showMatchOver(state: GameState): void {

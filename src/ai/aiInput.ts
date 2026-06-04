@@ -32,6 +32,38 @@ const PARAMS: Record<Difficulty, AiParams> = {
   hard: { lookahead: 82, acceptMargin: 6, useArea: true, areaProbe: 26, areaCap: 650, mistakeChance: 0 },
 };
 
+/** A fixed tier, or 'auto' — which rubber-bands toward the player each round. */
+export type DifficultySetting = Difficulty | 'auto';
+
+const AUTO_START = 0.5; // a notch below "normal" on the 0..1 skill scale
+const AUTO_STEP = 0.12; // skill change per round
+const AUTO_MIN = 0.1;
+const AUTO_MAX = 1;
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+function clamp(v: number, lo: number, hi: number): number {
+  return v < lo ? lo : v > hi ? hi : v;
+}
+
+/** Interpolate AI parameters from a 0..1 skill level (very beatable → hard), for
+ *  Auto. Lookahead (wall/trail reaction) is the main strength lever, so the low
+ *  end is deliberately short-sighted and slip-prone to give a struggling player
+ *  real room to win. */
+function paramsForSkill(skill: number): AiParams {
+  const s = clamp(skill, 0, 1);
+  const useArea = s >= 0.35; // territory sense kicks in above the easiest band
+  return {
+    lookahead: Math.round(lerp(20, 82, s)),
+    acceptMargin: Math.round(lerp(8, 6, s)),
+    useArea,
+    areaProbe: useArea ? Math.round(lerp(14, 26, s)) : 0,
+    areaCap: useArea ? Math.round(lerp(320, 650, s)) : 0,
+    mistakeChance: Math.max(0, lerp(0.22, 0, clamp(s / 0.7, 0, 1))),
+  };
+}
+
 const SAFE_MIN = 4; // a move surviving fewer steps than this is "about to die"
 const STRAIGHT_BIAS = 0.25; // gentle anti-jitter for the no-area (easy) tier
 const ACTIONS: Array<-1 | 0 | 1> = [-1, 0, 1];
@@ -47,14 +79,17 @@ const ACTIONS: Array<-1 | 0 | 1> = [-1, 0, 1];
 export class AiInput implements InputSource {
   private readonly grid: OccupancyGrid;
   private readonly ids: Set<string>;
-  private readonly params: AiParams;
+  private params: AiParams;
   private readonly wallMargin: number;
   private readonly selfSkip: number;
   private readonly rng = new Rng(0x7717);
+  private readonly adaptive: boolean;
+  private skill = AUTO_START;
 
-  constructor(aiPlayerIds: string[], config: GameConfig, difficulty: Difficulty = 'normal') {
+  constructor(aiPlayerIds: string[], config: GameConfig, difficulty: DifficultySetting = 'normal') {
     this.ids = new Set(aiPlayerIds);
-    this.params = PARAMS[difficulty];
+    this.adaptive = difficulty === 'auto';
+    this.params = this.adaptive ? paramsForSkill(this.skill) : PARAMS[difficulty as Difficulty];
     this.grid = new OccupancyGrid(
       config.arenaWidth,
       config.arenaHeight,
@@ -65,6 +100,24 @@ export class AiInput implements InputSource {
     // Ignore trail hits within the first few steps so a bot doesn't "see" its own
     // neck just behind the head (mirrors the sim's self-collision grace).
     this.selfSkip = Math.max(3, config.graceSegments + 1);
+  }
+
+  get isAdaptive(): boolean {
+    return this.adaptive;
+  }
+
+  /**
+   * Rubber-band the bots one notch after a round (Auto only). Pass true if the
+   * human outperformed the bots (→ harder), false if the bots won (→ easier).
+   * Returns the direction actually applied, for player feedback.
+   */
+  nudgeSkill(humanOutperformed: boolean): 'up' | 'down' | 'same' {
+    if (!this.adaptive) return 'same';
+    const before = this.skill;
+    this.skill = clamp(this.skill + (humanOutperformed ? AUTO_STEP : -AUTO_STEP), AUTO_MIN, AUTO_MAX);
+    if (this.skill === before) return 'same';
+    this.params = paramsForSkill(this.skill);
+    return humanOutperformed ? 'up' : 'down';
   }
 
   getInputs(state: GameState): Input[] {

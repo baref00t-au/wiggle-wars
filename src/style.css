@@ -179,6 +179,12 @@ body {
   margin-top: 4px;
 }
 
+.menu-hint {
+  margin: -8px 0 0;
+  color: var(--accent);
+  font-size: 13px;
+}
+
 /* ---------- Buttons ---------- */
 
 .btn {
