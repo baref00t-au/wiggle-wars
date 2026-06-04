@@ -44,6 +44,8 @@ export class SameDeviceMode {
   private humanIds: Set<string>;
   private disposed = false;
   private wasFullscreen = false;
+  private paused = false;
+  private pauseEl: HTMLElement | null = null;
   /** Rounds finished this match (read by the app for the post-session reflection). */
   roundsPlayed = 0;
 
@@ -134,6 +136,7 @@ export class SameDeviceMode {
     this.container.removeEventListener('pointerdown', this.onPointer);
     this.input.dispose();
     this.hud.dispose();
+    this.pauseEl?.remove();
     this.canvas.remove();
   }
 
@@ -166,10 +169,28 @@ export class SameDeviceMode {
       this.quit();
       return;
     }
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      this.togglePause();
+      return;
+    }
     if (e.key === ' ' || e.key === 'Enter') {
       if (this.tryAdvance()) e.preventDefault();
     }
   };
+
+  private togglePause(): void {
+    this.paused = !this.paused;
+    if (this.paused) {
+      this.loop.stop();
+      this.pauseEl = el('div', 'pause-overlay', '⏸  Paused — press P to resume');
+      this.container.append(this.pauseEl);
+    } else {
+      this.pauseEl?.remove();
+      this.pauseEl = null;
+      this.loop.start();
+    }
+  }
 
   private onPointer = (): void => {
     // Touch zones are hidden when not playing, so a tap here means "continue".
