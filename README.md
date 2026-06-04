@@ -7,6 +7,16 @@ wall, another trail, or your own.
 Zero install, no accounts, no data collection — see the build plan for the full
 design constraints.
 
+## Engaging, not addictive
+
+Wiggle Wars deliberately contains **none** of the manipulative "engagement" patterns
+common in kids' games — no random rewards, timers, streaks, social pressure, sticky
+exits, or tracking. The rule is: *earn the player's time, don't override their
+judgment.* See **[ETHICS.md](ETHICS.md)** for the full checklist and how the game
+complies. There's also a classroom lesson,
+**[Spot the Trick](docs/lesson-spot-the-trick.md)**, that uses the game as an honest
+counter-example to teach kids to recognise these tricks.
+
 ## Status
 
 - **Phase 1 — Core simulation:** ✅ done. Pure, deterministic engine in `src/sim`,

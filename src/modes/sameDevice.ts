@@ -36,6 +36,7 @@ export class SameDeviceMode {
   private loop: GameLoop;
   private aiIds: Set<string>;
   private humanIds: Set<string>;
+  private quitBtn: HTMLButtonElement | null = null;
 
   private seed: number;
   private phase: Phase = 'running';
@@ -95,6 +96,17 @@ export class SameDeviceMode {
     window.addEventListener('resize', this.fit);
     document.addEventListener('keydown', this.onKey);
     this.container.addEventListener('pointerdown', this.onPointer);
+
+    // An always-visible, frictionless way out (see ETHICS.md). Esc does the same.
+    this.quitBtn = el('button', 'quit-btn', '☰ Menu');
+    this.quitBtn.title = 'Back to menu (Esc)';
+    this.quitBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.dispose();
+      this.onExit();
+    });
+    this.container.append(this.quitBtn);
+
     this.loop.start();
 
     // Dev-only handle for headless verification; stripped from production builds.
@@ -109,6 +121,7 @@ export class SameDeviceMode {
     this.container.removeEventListener('pointerdown', this.onPointer);
     this.input.dispose();
     this.hud.dispose();
+    this.quitBtn?.remove();
     this.canvas.remove();
   }
 
