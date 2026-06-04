@@ -9,9 +9,11 @@ export interface KeyBinding {
   right: string[];
 }
 
-/** Default two-key-per-player layout for same-device play (Phase 3). */
+// Keys are spread across the keyboard so four players don't trigger ghosting
+// (dropped simultaneous presses) by crowding the same area. Arrows stay on
+// player 2 so 2- and 3-player games are split left/right.
 export const DEFAULT_BINDINGS: KeyBinding[] = [
-  { playerId: 'p1', left: ['a'], right: ['d'] },
+  { playerId: 'p1', left: ['1'], right: ['3'] },
   { playerId: 'p2', left: ['ArrowLeft'], right: ['ArrowRight'] },
   { playerId: 'p3', left: ['j'], right: ['l'] },
   { playerId: 'p4', left: ['z'], right: ['c'] },

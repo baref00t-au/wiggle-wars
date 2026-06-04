@@ -29,7 +29,7 @@ const DIFFICULTY_OPTIONS: { value: DifficultySetting; label: string }[] = [
   { value: 'hard', label: 'Hard' },
   { value: 'auto', label: 'Auto' },
 ];
-const KEY_HINTS = ['A / D', '← / →', 'J / L', 'Z / C'];
+const KEY_HINTS = ['1 / 3', '← / →', 'J / L', 'Z / C'];
 
 /**
  * The start screen: pick how many players, each a colour + optional nickname +
