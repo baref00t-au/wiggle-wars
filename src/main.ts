@@ -43,9 +43,18 @@ document.body.append(muteBtn);
 // Only one screen (menu, learn, or game) is mounted at a time; `cleanup` tears
 // down whatever is currently up before the next one mounts.
 let cleanup: (() => void) | null = null;
+let reflectionShown = false; // at most once per session (in-memory only)
+let reflectionEl: HTMLElement | null = null;
+
+function removeReflection(): void {
+  reflectionEl?.remove();
+  reflectionEl = null;
+}
+
 function clearScreen(): void {
   cleanup?.();
   cleanup = null;
+  removeReflection();
 }
 
 function showMenu(): void {
@@ -60,9 +69,32 @@ function showLearn(): void {
 
 function startMatch(setup: MatchSetup): void {
   clearScreen();
-  const mode = new SameDeviceMode(app!, setup, sfx, showMenu);
+  const mode = new SameDeviceMode(app!, setup, sfx, () => exitMatch(mode));
   mode.start();
   cleanup = () => mode.dispose();
+}
+
+function exitMatch(mode: SameDeviceMode): void {
+  const rounds = mode.roundsPlayed;
+  showMenu();
+  // Honest inverse of a "rate us!" nag: optional, one-tap, once per session,
+  // never blocks anything, stores nothing. Only after a real session of play.
+  if (rounds >= 2 && !reflectionShown) {
+    reflectionShown = true;
+    const bar = el('div', 'reflection');
+    bar.append(el('span', 'reflection-q', 'What made that fun?'));
+    const opts = el('div', 'reflection-opts');
+    for (const label of ['It was close', 'Playing together', 'I got better', 'Just fun']) {
+      const b = el('button', 'btn small', label);
+      b.addEventListener('click', removeReflection);
+      opts.append(b);
+    }
+    const skip = el('button', 'reflection-skip', 'skip');
+    skip.addEventListener('click', removeReflection);
+    bar.append(opts, skip);
+    document.body.append(bar);
+    reflectionEl = bar;
+  }
 }
 
 showMenu();

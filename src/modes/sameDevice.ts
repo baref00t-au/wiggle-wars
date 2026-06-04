@@ -11,6 +11,12 @@ import { Hud } from '../ui/hud';
 import { el } from '../ui/dom';
 import type { MatchSetup } from '../ui/menu';
 import type { Sfx } from '../audio/sfx';
+import { store } from '../learn/store';
+
+function todayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
 
 type Phase = 'running' | 'roundOver' | 'matchOver';
 
@@ -38,6 +44,8 @@ export class SameDeviceMode {
   private humanIds: Set<string>;
   private disposed = false;
   private wasFullscreen = false;
+  /** Rounds finished this match (read by the app for the post-session reflection). */
+  roundsPlayed = 0;
 
   private seed: number;
   private phase: Phase = 'running';
@@ -228,6 +236,8 @@ export class SameDeviceMode {
         this.roundEndHandled = true;
         this.advanceReadyAt = now + ADVANCE_DELAY_MS;
         this.touch.setVisible(false);
+        this.roundsPlayed += 1;
+        this.recordSurvival(state);
 
         // Auto difficulty: rubber-band toward the human's level each round.
         let adaptNote: string | undefined;
@@ -278,11 +288,31 @@ export class SameDeviceMode {
     return best;
   }
 
+  /** Local-only mastery feedback: remember the human's longest survival today.
+   *  Compared only to the player's own past on this device — never to others. */
+  private recordSurvival(state: GameState): void {
+    let best = 0;
+    for (const p of state.players) {
+      if (!this.humanIds.has(p.id)) continue;
+      const ticks = p.alive ? state.tick : p.diedAtTick ?? 0;
+      if (ticks > best) best = ticks;
+    }
+    if (best <= 0) return;
+    const day = todayKey();
+    const cur = store.skill();
+    if (!cur || cur.day !== day || best > cur.bestTicksToday) {
+      store.setSkill({ day, bestTicksToday: Math.max(best, cur && cur.day === day ? cur.bestTicksToday : 0) });
+    }
+  }
+
   private showMatchOver(state: GameState): void {
     const winner = state.players.find((p) => p.id === state.matchWinnerId);
+    const skill = store.skill();
+    const secs = skill && skill.day === todayKey() ? skill.bestTicksToday / state.config.tickRate : 0;
     this.hud.showMessage({
       title: winner ? `${winner.name} wins the match!` : 'Game over',
       titleColor: winner ? colorFor(winner.colorIndex).head : undefined,
+      subtitle: secs > 0 ? `🏅 Your longest survival today: ${secs.toFixed(1)}s` : undefined,
       celebrate: true,
       buttons: [
         { label: 'Play again', primary: true, onClick: () => this.rematch() },
