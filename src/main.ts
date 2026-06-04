@@ -1,61 +1,40 @@
-// Phase 2 "ghost test": drive a single line with the keyboard to eyeball that
-// movement, turning, trails, and wall death all look right. This wiring is
-// temporary — the real menus and multi-player setup arrive in Phase 3.
+// App entry: show the menu, run a same-device match, return to the menu on exit.
+// No data is collected or stored anywhere.
 
-import { createInitialState, makeConfig, resetRound } from './sim/simulation';
-import type { GameState, PlayerSpec } from './sim/types';
-import { Renderer } from './render/renderer';
-import { LocalKeyboardInput } from './input/localKeyboardInput';
-import { GameLoop } from './modes/gameLoop';
+import { renderMenu } from './ui/menu';
+import type { MatchSetup } from './ui/menu';
+import { SameDeviceMode } from './modes/sameDevice';
+import { Sfx } from './audio/sfx';
+import { el } from './ui/dom';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('#app container is missing');
+app.replaceChildren();
 
-app.innerHTML = `
-  <canvas id="game"></canvas>
-  <div id="hint" class="hint"></div>
-`;
+const sfx = new Sfx();
 
-const canvas = document.querySelector<HTMLCanvasElement>('#game');
-const hint = document.querySelector<HTMLDivElement>('#hint');
-if (!canvas || !hint) throw new Error('game canvas/hint missing');
-
-const config = makeConfig();
-const specs: PlayerSpec[] = [{ id: 'p1', colorIndex: 0, name: 'Blue' }];
-
-let seed = 1;
-const initial = createInitialState(config, specs, seed);
-
-const renderer = new Renderer(canvas, config.arenaWidth, config.arenaHeight);
-const input = new LocalKeyboardInput([
-  { playerId: 'p1', left: ['ArrowLeft', 'a'], right: ['ArrowRight', 'd'] },
-]);
-
-function updateHint(state: GameState): void {
-  if (state.status === 'countdown') {
-    const secs = Math.ceil(state.countdown / state.config.tickRate);
-    hint!.textContent = `Get ready… ${secs}`;
-  } else if (state.status === 'roundOver') {
-    hint!.textContent = 'Crashed! Press R or Space to go again';
-  } else {
-    hint!.textContent = 'Steer:  ← →   or   A D';
-  }
-}
-
-const loop = new GameLoop({ initialState: initial, input, renderer, onRender: updateHint });
-
-function fit(): void {
-  renderer.resize();
-}
-window.addEventListener('resize', fit);
-fit();
-loop.start();
-
-// Restart with R, or Space once the round is over.
-window.addEventListener('keydown', (e) => {
-  const key = e.key.toLowerCase();
-  if (key === 'r' || (key === ' ' && loop.getState().status === 'roundOver')) {
-    seed += 1;
-    loop.setState(resetRound(loop.getState(), seed));
-  }
+// Persistent sound toggle (muted by default, as agreed for classrooms).
+const muteBtn = el('button', 'mute-btn', '🔇');
+muteBtn.title = 'Sound on / off';
+muteBtn.addEventListener('click', () => {
+  const muted = sfx.toggle();
+  muteBtn.textContent = muted ? '🔇' : '🔊';
 });
+document.body.append(muteBtn);
+
+let disposeMenu: (() => void) | null = null;
+let mode: SameDeviceMode | null = null;
+
+function showMenu(): void {
+  mode = null;
+  disposeMenu = renderMenu(app!, startMatch);
+}
+
+function startMatch(setup: MatchSetup): void {
+  disposeMenu?.();
+  disposeMenu = null;
+  mode = new SameDeviceMode(app!, setup, sfx, showMenu);
+  mode.start();
+}
+
+showMenu();

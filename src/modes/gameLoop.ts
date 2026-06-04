@@ -46,6 +46,7 @@ export class GameLoop {
     this.running = true;
     this.lastTime = 0;
     this.accumulator = 0;
+    this.advance(0); // paint an immediate first frame; don't wait for rAF
     this.rafId = requestAnimationFrame(this.frame);
   }
 
@@ -65,12 +66,13 @@ export class GameLoop {
     this.accumulator = 0;
   }
 
-  private frame = (now: number): void => {
-    if (!this.running) return;
-    if (this.lastTime === 0) this.lastTime = now;
-    let elapsed = now - this.lastTime;
-    this.lastTime = now;
-    if (elapsed > MAX_FRAME_MS) elapsed = MAX_FRAME_MS;
+  /**
+   * Advance by a measured elapsed time: run as many fixed sim ticks as the
+   * accumulator allows, then render once. Public so it can be driven manually
+   * (e.g. headless verification) instead of only by requestAnimationFrame.
+   */
+  advance(elapsedMs: number): void {
+    const elapsed = Math.min(elapsedMs, MAX_FRAME_MS);
     this.accumulator += elapsed;
 
     // Sample input once per frame; held steering is constant between frames.
@@ -82,6 +84,14 @@ export class GameLoop {
 
     this.renderer.draw(this.state);
     this.onRender?.(this.state);
+  }
+
+  private frame = (now: number): void => {
+    if (!this.running) return;
+    if (this.lastTime === 0) this.lastTime = now;
+    const elapsed = now - this.lastTime;
+    this.lastTime = now;
+    this.advance(elapsed);
     this.rafId = requestAnimationFrame(this.frame);
   };
 }
