@@ -154,7 +154,11 @@ export class SameDeviceMode {
   };
 
   private config() {
-    return makeConfig({ targetScore: this.setup.targetScore });
+    return makeConfig({
+      targetScore: this.setup.targetScore,
+      speed: this.setup.speed,
+      turnRate: this.setup.speed / this.setup.turnRadius,
+    });
   }
 
   private specs() {

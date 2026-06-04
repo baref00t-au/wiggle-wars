@@ -7,10 +7,22 @@ export interface MatchSetup {
   players: { id: string; colorIndex: number; name: string; isAi: boolean }[];
   targetScore: number;
   difficulty: DifficultySetting;
+  speed: number;
+  turnRadius: number;
 }
 
 const COUNT_OPTIONS = [2, 3, 4];
 const SCORE_OPTIONS = [3, 5, 10];
+const SPEED_OPTIONS = [
+  { label: 'Slow', value: 1.6 },
+  { label: 'Normal', value: 2.2 },
+  { label: 'Fast', value: 3 },
+];
+const RADIUS_OPTIONS = [
+  { label: 'Tight', value: 32 },
+  { label: 'Normal', value: 49 },
+  { label: 'Wide', value: 75 },
+];
 const DIFFICULTY_OPTIONS: { value: DifficultySetting; label: string }[] = [
   { value: 'easy', label: 'Easy' },
   { value: 'normal', label: 'Normal' },
@@ -33,6 +45,8 @@ export function renderMenu(
   let count = saved.count;
   let targetScore = saved.targetScore;
   let difficulty = saved.difficulty;
+  let speed = saved.speed;
+  let turnRadius = saved.turnRadius;
   const colorIndices = [...saved.colorIndices];
   const isAi = [...saved.ai];
   const names = ['', '', '', '']; // nicknames are never persisted (see settings.ts)
@@ -170,9 +184,35 @@ export function renderMenu(
     }
     wrap.append(scoreRow);
 
+    const speedRow = el('div', 'option-row');
+    speedRow.append(el('span', 'option-label', 'Speed'));
+    for (const opt of SPEED_OPTIONS) {
+      const b = el('button', `pill${opt.value === speed ? ' on' : ''}`, opt.label);
+      b.addEventListener('click', () => {
+        speed = opt.value;
+        patchSettings({ speed });
+        render();
+      });
+      speedRow.append(b);
+    }
+    wrap.append(speedRow);
+
+    const radiusRow = el('div', 'option-row');
+    radiusRow.append(el('span', 'option-label', 'Turn radius'));
+    for (const opt of RADIUS_OPTIONS) {
+      const b = el('button', `pill${opt.value === turnRadius ? ' on' : ''}`, opt.label);
+      b.addEventListener('click', () => {
+        turnRadius = opt.value;
+        patchSettings({ turnRadius });
+        render();
+      });
+      radiusRow.append(b);
+    }
+    wrap.append(radiusRow);
+
     const start = el('button', 'btn primary start', 'Start');
     start.addEventListener('click', () => {
-      patchSettings({ count, colorIndices, targetScore, ai: isAi.slice(), difficulty });
+      patchSettings({ count, colorIndices, targetScore, ai: isAi.slice(), difficulty, speed, turnRadius });
       const players = [];
       for (let i = 0; i < count; i++) {
         const col = colorFor(colorIndices[i]);
@@ -183,7 +223,7 @@ export function renderMenu(
           isAi: isAi[i],
         });
       }
-      onStart({ players, targetScore, difficulty });
+      onStart({ players, targetScore, difficulty, speed, turnRadius });
     });
     wrap.append(start);
 

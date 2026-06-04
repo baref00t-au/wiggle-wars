@@ -15,6 +15,10 @@ export interface StoredSettings {
   ai: boolean[];
   /** Difficulty shared by all bots ('auto' rubber-bands to the player). */
   difficulty: DifficultySetting;
+  /** Line speed (px/tick). */
+  speed: number;
+  /** Turning circle radius (px); turnRate is derived as speed / turnRadius. */
+  turnRadius: number;
 }
 
 const KEY = 'wiggle-wars:v1';
@@ -27,7 +31,13 @@ const DEFAULTS: StoredSettings = {
   targetScore: 5,
   ai: [false, false, false, false],
   difficulty: 'normal',
+  speed: 2.2,
+  turnRadius: 49,
 };
+
+function num(v: unknown, fallback: number): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+}
 
 function clampCount(n: unknown): number {
   const v = Number(n);
@@ -56,6 +66,8 @@ export function loadSettings(): StoredSettings {
         typeof parsed.difficulty === 'string' && DIFFICULTIES.includes(parsed.difficulty)
           ? parsed.difficulty
           : DEFAULTS.difficulty,
+      speed: num(parsed.speed, DEFAULTS.speed),
+      turnRadius: num(parsed.turnRadius, DEFAULTS.turnRadius),
     };
   } catch {
     return { ...DEFAULTS };
