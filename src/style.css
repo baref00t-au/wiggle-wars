@@ -526,6 +526,266 @@ body {
   background: linear-gradient(90deg, #56b4e9, #7cfc9a);
 }
 
+/* hub prefs */
+.learn-prefs,
+.clear-confirm {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: min(560px, 94vw);
+}
+
+.clear-q {
+  flex: 1 1 100%;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.btn.small {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+/* mode top bar */
+.learn-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(620px, 94vw);
+}
+
+.learn-h2 {
+  margin: 0;
+  font-size: clamp(20px, 4vw, 30px);
+}
+
+.golden {
+  width: min(620px, 94vw);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(86, 180, 233, 0.14);
+  border: 1px solid #2c3157;
+  color: #c9e8fb;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* age toggle */
+.age-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.age-label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* trick grid */
+.trick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  width: min(620px, 94vw);
+}
+
+.trick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 10px;
+  border-radius: 16px;
+  border: 2px solid #2c3157;
+  background: var(--panel);
+  color: var(--fg);
+  cursor: pointer;
+  text-align: center;
+}
+
+.trick-card.on {
+  border-color: var(--accent);
+  background: rgba(86, 180, 233, 0.18);
+}
+
+.trick-emoji {
+  font-size: 34px;
+}
+
+.trick-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.trick-realname {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.trick-field {
+  width: min(560px, 94vw);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.trick-field-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trick-field.spot {
+  border-left: 4px solid #56b4e9;
+}
+
+.trick-field.honest {
+  border-left: 4px solid #7cfc9a;
+}
+
+/* trick hunt */
+.hunt-progress {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.hunt-context {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #cc79a7;
+}
+
+.hunt-text {
+  width: min(560px, 94vw);
+  text-align: center;
+  font-size: clamp(17px, 3vw, 22px);
+  font-weight: 600;
+}
+
+/* honest promise */
+.promise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(560px, 94vw);
+}
+
+.promise-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.promise-text {
+  font-weight: 700;
+}
+
+.promise-trick {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.promise-frag {
+  width: min(560px, 94vw);
+  text-align: center;
+  font-style: italic;
+  font-size: clamp(16px, 2.8vw, 20px);
+}
+
+/* design lab */
+.chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  width: min(560px, 94vw);
+}
+
+.chip {
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 2px solid #2c3157;
+  background: var(--panel);
+  color: var(--fg);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.chip.on {
+  border-color: #7cfc9a;
+  background: rgba(124, 252, 154, 0.16);
+}
+
+.learn-input {
+  width: min(560px, 94vw);
+  min-height: 80px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid #2c3157;
+  background: rgba(10, 11, 22, 0.7);
+  color: var(--fg);
+  font: inherit;
+  font-size: 16px;
+  resize: vertical;
+}
+
+.learn-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.design-card {
+  width: min(560px, 94vw);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--panel);
+  border-left: 4px solid #7cfc9a;
+}
+
+.design-trick {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.design-idea {
+  color: #7cfc9a;
+}
+
+.design-promise {
+  color: var(--muted);
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
 /* ---------- HUD ---------- */
 
 .hud {

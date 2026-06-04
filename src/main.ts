@@ -9,6 +9,7 @@ import { SameDeviceMode } from './modes/sameDevice';
 import { Sfx } from './audio/sfx';
 import { el } from './ui/dom';
 import { loadSettings, patchSettings } from './settings';
+import { applyReducedMotion, store } from './learn/store';
 import { createInitialState, makeConfig, step } from './sim/simulation';
 import { AiInput } from './ai/aiInput';
 
@@ -17,6 +18,7 @@ if (!app) throw new Error('#app container is missing');
 app.replaceChildren();
 
 const settings = loadSettings();
+applyReducedMotion(store.reducedMotion());
 const sfx = new Sfx(settings.muted);
 
 // Resume audio on the first real user gesture (required by browsers), unless muted.
