@@ -4,6 +4,7 @@
 
 import { renderMenu } from './ui/menu';
 import type { MatchSetup } from './ui/menu';
+import { renderLearn } from './ui/learn';
 import { SameDeviceMode } from './modes/sameDevice';
 import { Sfx } from './audio/sfx';
 import { el } from './ui/dom';
@@ -37,19 +38,29 @@ muteBtn.addEventListener('click', () => {
 });
 document.body.append(muteBtn);
 
-let disposeMenu: (() => void) | null = null;
-let mode: SameDeviceMode | null = null;
+// Only one screen (menu, learn, or game) is mounted at a time; `cleanup` tears
+// down whatever is currently up before the next one mounts.
+let cleanup: (() => void) | null = null;
+function clearScreen(): void {
+  cleanup?.();
+  cleanup = null;
+}
 
 function showMenu(): void {
-  mode = null;
-  disposeMenu = renderMenu(app!, startMatch);
+  clearScreen();
+  cleanup = renderMenu(app!, startMatch, showLearn);
+}
+
+function showLearn(): void {
+  clearScreen();
+  cleanup = renderLearn(app!, showMenu);
 }
 
 function startMatch(setup: MatchSetup): void {
-  disposeMenu?.();
-  disposeMenu = null;
-  mode = new SameDeviceMode(app!, setup, sfx, showMenu);
+  clearScreen();
+  const mode = new SameDeviceMode(app!, setup, sfx, showMenu);
   mode.start();
+  cleanup = () => mode.dispose();
 }
 
 showMenu();

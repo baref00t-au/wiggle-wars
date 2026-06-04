@@ -27,6 +27,7 @@ const KEY_HINTS = ['A / D', '← / →', 'J / L', 'Z / C'];
 export function renderMenu(
   container: HTMLElement,
   onStart: (setup: MatchSetup) => void,
+  onLearn: () => void,
 ): () => void {
   const saved = loadSettings();
   let count = saved.count;
@@ -184,6 +185,11 @@ export function renderMenu(
       onStart({ players, targetScore, difficulty });
     });
     wrap.append(start);
+
+    const learn = el('button', 'btn learn-link', '🔎 Spot the Trick');
+    learn.title = 'Learn the tricks games use to keep you hooked';
+    learn.addEventListener('click', onLearn);
+    wrap.append(learn);
 
     wrap.append(
       el('p', 'menu-foot', 'Keyboard or touch · add bots with 🤖 · sound off by default (top-right)'),

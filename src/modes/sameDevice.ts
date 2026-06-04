@@ -37,6 +37,7 @@ export class SameDeviceMode {
   private aiIds: Set<string>;
   private humanIds: Set<string>;
   private quitBtn: HTMLButtonElement | null = null;
+  private disposed = false;
 
   private seed: number;
   private phase: Phase = 'running';
@@ -115,6 +116,8 @@ export class SameDeviceMode {
   }
 
   dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
     this.loop.stop();
     window.removeEventListener('resize', this.fit);
     document.removeEventListener('keydown', this.onKey);

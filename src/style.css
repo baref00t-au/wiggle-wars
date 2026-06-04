@@ -209,6 +209,199 @@ body {
   padding: 14px 48px;
 }
 
+/* ---------- Learn: Spot the Trick ---------- */
+
+.btn.learn-link {
+  border-color: #cc79a7;
+  background: rgba(204, 121, 167, 0.16);
+  font-size: 16px;
+}
+
+.learn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 28px 20px 40px;
+  overflow-y: auto;
+}
+
+.learn-title {
+  margin: 8px 0 0;
+  font-size: clamp(30px, 6vw, 52px);
+  text-align: center;
+}
+
+.learn-lead {
+  max-width: 640px;
+  margin: 0;
+  text-align: center;
+  color: var(--fg);
+  font-size: clamp(15px, 2.6vw, 19px);
+  line-height: 1.5;
+}
+
+.learn-step {
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.learn-trick-title {
+  margin: 0;
+  font-size: clamp(26px, 5vw, 40px);
+  text-align: center;
+}
+
+.learn-prompt {
+  margin: 0;
+  color: var(--muted);
+}
+
+.demo-stage {
+  width: min(460px, 92vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #1d1030;
+  border: 2px dashed #4a3a6a;
+}
+
+.demo-big {
+  padding: 14px 26px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(90deg, #ff7a18, #ffd400);
+  color: #2a1500;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.demo-big.urgent {
+  background: linear-gradient(90deg, #ff2d55, #ff7a18);
+  color: #fff;
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.demo-big:disabled {
+  filter: grayscale(0.6) brightness(0.8);
+  animation: none;
+  cursor: default;
+}
+
+.demo-tiny {
+  background: none;
+  border: none;
+  color: #6b6f8c;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.demo-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.demo-result {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.demo-result.win {
+  color: #ffd400;
+}
+
+.demo-timer {
+  font-size: 30px;
+  font-weight: 800;
+  color: #ff2d55;
+}
+
+.demo-banner {
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.demo-banner.urgent {
+  color: #ffd400;
+}
+
+.demo-streak {
+  font-size: 26px;
+}
+
+.demo-notif {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #2a2140;
+  font-weight: 600;
+  text-align: left;
+}
+
+.reveal {
+  display: none;
+  width: min(560px, 94vw);
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--panel);
+  border-left: 4px solid #56b4e9;
+}
+
+.reveal.show {
+  display: flex;
+  animation: pop 0.35s ease;
+}
+
+.reveal-head {
+  font-size: 19px;
+  font-weight: 800;
+  color: #56b4e9;
+}
+
+.reveal-why,
+.reveal-grownup,
+.reveal-do,
+.reveal-wiggle {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.reveal-grownup {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.reveal-wiggle {
+  color: #7cfc9a;
+  font-weight: 600;
+}
+
+.learn-nav {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
 /* ---------- HUD ---------- */
 
 .hud {
