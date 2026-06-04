@@ -7,6 +7,8 @@ wall, another trail, or your own.
 Zero install, no accounts, no data collection — see the build plan for the full
 design constraints.
 
+**Teachers:** start with the **[brief for teachers](docs/for-teachers.md)**.
+
 ## Engaging, not addictive
 
 Wiggle Wars deliberately contains **none** of the manipulative "engagement" patterns
