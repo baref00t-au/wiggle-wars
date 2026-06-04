@@ -8,6 +8,8 @@ import { SameDeviceMode } from './modes/sameDevice';
 import { Sfx } from './audio/sfx';
 import { el } from './ui/dom';
 import { loadSettings, patchSettings } from './settings';
+import { createInitialState, makeConfig, step } from './sim/simulation';
+import { AiInput } from './ai/aiInput';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('#app container is missing');
@@ -51,3 +53,9 @@ function startMatch(setup: MatchSetup): void {
 }
 
 showMenu();
+
+// Dev-only headless harness for evaluating bot strength (stripped from prod).
+const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV;
+if (isDev) {
+  (window as unknown as Record<string, unknown>).wiggleDev = { createInitialState, makeConfig, step, AiInput };
+}

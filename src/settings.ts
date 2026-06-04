@@ -4,6 +4,8 @@
 // All access is wrapped in try/catch because locked-down school devices / private
 // mode can make localStorage throw or be absent; we silently fall back to defaults.
 
+import type { Difficulty } from './ai/aiInput';
+
 export interface StoredSettings {
   muted: boolean;
   count: number;
@@ -11,9 +13,12 @@ export interface StoredSettings {
   targetScore: number;
   /** Per-slot: true = computer-controlled. */
   ai: boolean[];
+  /** Difficulty shared by all bots. */
+  difficulty: Difficulty;
 }
 
 const KEY = 'wiggle-wars:v1';
+const DIFFICULTIES: Difficulty[] = ['easy', 'normal', 'hard'];
 
 const DEFAULTS: StoredSettings = {
   muted: true,
@@ -21,6 +26,7 @@ const DEFAULTS: StoredSettings = {
   colorIndices: [0, 1, 2, 3],
   targetScore: 5,
   ai: [false, false, false, false],
+  difficulty: 'normal',
 };
 
 function clampCount(n: unknown): number {
@@ -46,6 +52,10 @@ export function loadSettings(): StoredSettings {
         Array.isArray(parsed.ai) && parsed.ai.length >= 4
           ? parsed.ai.slice(0, 4).map(Boolean)
           : [...DEFAULTS.ai],
+      difficulty:
+        typeof parsed.difficulty === 'string' && DIFFICULTIES.includes(parsed.difficulty)
+          ? parsed.difficulty
+          : DEFAULTS.difficulty,
     };
   } catch {
     return { ...DEFAULTS };

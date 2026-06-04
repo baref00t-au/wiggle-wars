@@ -14,9 +14,11 @@ design constraints.
 - **Phase 2 — Rendering & single-player test:** ✅ done. Canvas renderer,
   fixed-timestep loop, keyboard input; drive one line with arrows/A-D.
 - **Phase 3 — Same-device multiplayer (first shippable):** ✅ done. Menu
-  (2–4 players, colours, nicknames, target score), keyboard **and** touch input,
-  HUD, round → match loop, death/win effects, muted-by-default sound.
-  **Ready to test with students.**
+  (2–4 players, colours, nicknames, target score, **Human/Bot per slot**),
+  keyboard **and** touch input, HUD, round → match loop, death/win effects,
+  muted-by-default sound, settings saved locally. **Ready to test with students.**
+  - **AI players:** any slot can be a bot (at least 1 human). Bots steer by
+    lookahead over a coarse occupancy grid — see `src/ai/`.
 - Phase 4 — Same-WiFi multiplayer: not started (do not start until Phase 3 is
   tried with real students).
 

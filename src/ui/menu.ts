@@ -1,14 +1,21 @@
 import { PALETTE, colorFor } from '../render/colors';
 import { el } from './dom';
 import { loadSettings, patchSettings } from '../settings';
+import type { Difficulty } from '../ai/aiInput';
 
 export interface MatchSetup {
   players: { id: string; colorIndex: number; name: string; isAi: boolean }[];
   targetScore: number;
+  difficulty: Difficulty;
 }
 
 const COUNT_OPTIONS = [2, 3, 4];
 const SCORE_OPTIONS = [3, 5, 10];
+const DIFFICULTY_OPTIONS: { value: Difficulty; label: string }[] = [
+  { value: 'easy', label: 'Easy' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'hard', label: 'Hard' },
+];
 const KEY_HINTS = ['A / D', '← / →', 'J / L', 'Z / C'];
 
 /**
@@ -23,6 +30,7 @@ export function renderMenu(
   const saved = loadSettings();
   let count = saved.count;
   let targetScore = saved.targetScore;
+  let difficulty = saved.difficulty;
   const colorIndices = [...saved.colorIndices];
   const isAi = [...saved.ai];
   const names = ['', '', '', '']; // nicknames are never persisted (see settings.ts)
@@ -127,6 +135,21 @@ export function renderMenu(
     }
     wrap.append(list);
 
+    if (isAi.slice(0, count).some(Boolean)) {
+      const diffRow = el('div', 'option-row');
+      diffRow.append(el('span', 'option-label', 'Bots'));
+      for (const opt of DIFFICULTY_OPTIONS) {
+        const b = el('button', `pill${opt.value === difficulty ? ' on' : ''}`, opt.label);
+        b.addEventListener('click', () => {
+          difficulty = opt.value;
+          patchSettings({ difficulty });
+          render();
+        });
+        diffRow.append(b);
+      }
+      wrap.append(diffRow);
+    }
+
     const scoreRow = el('div', 'option-row');
     scoreRow.append(el('span', 'option-label', 'First to'));
     for (const sc of SCORE_OPTIONS) {
@@ -142,7 +165,7 @@ export function renderMenu(
 
     const start = el('button', 'btn primary start', 'Start');
     start.addEventListener('click', () => {
-      patchSettings({ count, colorIndices, targetScore, ai: isAi.slice() });
+      patchSettings({ count, colorIndices, targetScore, ai: isAi.slice(), difficulty });
       const players = [];
       for (let i = 0; i < count; i++) {
         const col = colorFor(colorIndices[i]);
@@ -153,7 +176,7 @@ export function renderMenu(
           isAi: isAi[i],
         });
       }
-      onStart({ players, targetScore });
+      onStart({ players, targetScore, difficulty });
     });
     wrap.append(start);
 

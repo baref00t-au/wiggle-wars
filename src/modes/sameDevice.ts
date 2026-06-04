@@ -73,7 +73,7 @@ export class SameDeviceMode {
       container,
       humans.map((p) => ({ id: p.id, colorIndex: p.colorIndex, name: p.name })),
     );
-    this.ai = new AiInput(bots.map((p) => p.id), config);
+    this.ai = new AiInput(bots.map((p) => p.id), config, setup.difficulty);
     this.input = new MergedInput([this.keyboard, this.touch, this.ai]);
 
     this.loop = new GameLoop({
