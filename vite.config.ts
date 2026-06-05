@@ -2,7 +2,9 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // GitHub Pages serves this project site under /wiggle-wars/; dev/preview use root.
+  base: command === 'build' ? '/wiggle-wars/' : '/',
   // The game ships as plain static files — keep the build boring on purpose.
   build: {
     target: 'es2020',
@@ -46,4 +48,4 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
   },
-});
+}));
