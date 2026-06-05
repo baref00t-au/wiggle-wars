@@ -89,8 +89,11 @@ export function renderLobby(container: HTMLElement, cb: LobbyCallbacks): () => v
         wrap.append(el('p', 'menu-sub', 'Tell the other players this code:'));
         wrap.append(el('div', 'room-code', code));
       }
+      const players = roster();
+      wrap.append(el('p', 'lobby-count', `${players.length} / ${MAX_CLIENTS + 1} players joined`));
+
       const list = el('div', 'lobby-list');
-      for (const p of roster()) {
+      for (const p of players) {
         const row = el('div', 'lobby-row');
         const dot = el('span', 'dot-glyph', colorFor(p.colorIndex).glyph);
         dot.style.color = colorFor(p.colorIndex).line;
@@ -99,7 +102,6 @@ export function renderLobby(container: HTMLElement, cb: LobbyCallbacks): () => v
       }
       wrap.append(list);
 
-      const players = roster();
       const start = el('button', 'btn primary start', 'Start game');
       start.disabled = players.length < 2;
       start.addEventListener('click', () => {
@@ -197,6 +199,7 @@ export function renderLobby(container: HTMLElement, cb: LobbyCallbacks): () => v
       header('🔑 In the lobby');
       wrap.append(el('p', 'menu-sub', 'Connected! Waiting for the host to start…'));
       if (players) {
+        wrap.append(el('p', 'lobby-count', `${players.length} / ${MAX_CLIENTS + 1} players joined`));
         const list = el('div', 'lobby-list');
         for (const p of players) {
           const row = el('div', 'lobby-row');

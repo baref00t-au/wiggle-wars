@@ -190,11 +190,19 @@ body {
   border-radius: 16px;
 }
 
+.lobby-count {
+  font-weight: 700;
+  color: var(--accent);
+  margin: 4px 0 2px;
+}
+
 .lobby-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: min(360px, 90vw);
+  max-height: 42vh;
+  overflow-y: auto;
 }
 
 .lobby-row {
