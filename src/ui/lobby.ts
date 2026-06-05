@@ -45,9 +45,9 @@ export function renderLobby(container: HTMLElement, cb: LobbyCallbacks): () => v
 
   // ---------- choice ----------
   function showChoice(): void {
-    header('📡 Same-WiFi');
+    header('📡 WiFi / Online');
     wrap.append(
-      el('p', 'menu-sub', 'Play on your own devices, all on the same WiFi. One device hosts.'),
+      el('p', 'menu-sub', 'Play on your own devices — same WiFi, or over the internet with a code. One device hosts.'),
     );
     const host = el('button', 'btn primary start', '🖧 Host a game');
     host.addEventListener('click', showHosting);

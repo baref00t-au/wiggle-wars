@@ -228,8 +228,8 @@ export function renderMenu(
     });
     wrap.append(start);
 
-    const wifi = el('button', 'btn learn-link', '📡 Same-WiFi');
-    wifi.title = 'Play on separate devices on the same WiFi';
+    const wifi = el('button', 'btn learn-link', '📡 WiFi / Online');
+    wifi.title = 'Play on separate devices — same WiFi or over the internet with a code';
     wifi.addEventListener('click', onWifi);
     wrap.append(wifi);
 

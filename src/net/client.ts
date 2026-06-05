@@ -1,6 +1,7 @@
 import type { DataConnection, Peer } from 'peerjs';
 import type { ClientMsg, HostMsg } from './protocol';
 import { PEER_PREFIX } from './host';
+import { ICE_SERVERS } from './iceConfig';
 
 // Thin client transport: connect to the host's room code over a reliable, ordered
 // DataChannel and relay messages. PeerJS is lazy-loaded. (Untestable without a real
@@ -29,7 +30,7 @@ export class NetClient {
     try {
       const { Peer } = await import('peerjs');
       if (this.closed) return;
-      this.peer = new Peer();
+      this.peer = new Peer({ config: { iceServers: ICE_SERVERS } });
       this.peer.on('open', () => {
         if (this.closed || !this.peer) return;
         // Reliable + ordered so trail deltas never drop or reorder.

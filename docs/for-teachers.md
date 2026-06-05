@@ -84,16 +84,19 @@ Wiggle Wars is an installable web app — no app store, no account needed:
 It then launches full-screen from the home-screen icon and **works completely
 offline** afterwards.
 
-### Play on separate devices (Same-WiFi)
-Students can play on their own devices, all on the same WiFi:
-1. One device taps **📡 Same-WiFi → Host a game** and reads out the short **code**.
-2. The others tap **Same-WiFi → Join a game**, type their name and the code.
+### Play on separate devices (WiFi or internet)
+Students can play on their own devices — on the same WiFi, or over the internet with
+a code (e.g. a club running across homes):
+1. One device taps **📡 WiFi / Online → Host a game** and reads out the short **code**.
+2. The others tap **WiFi / Online → Join a game**, type their name and the code.
 3. The host taps **Start** — everyone plays together; the host paces the rounds.
 
-The very first connection uses the internet (a quick handshake to link the
-devices); the game itself is **device-to-device**, and **no student data is sent or
-stored** (see [`../ETHICS.md`](../ETHICS.md)). On WiFi with **no internet**, use
-same-device play, or a self-hosted connector (a developer task).
+The very first connection uses the internet (a quick handshake to link the devices);
+the game itself is **device-to-device**, and **no student data is sent or stored**
+(see [`../ETHICS.md`](../ETHICS.md)). It's for people sharing a code — there's no
+public lobby of strangers. On WiFi with **no internet**, use same-device play. For
+the technical details (and the rare case where a network needs a relay), see
+[`online-play.md`](online-play.md).
 
 ## A note on tone
 The aim isn't to scare students off games or to moralise — it's to hand them the

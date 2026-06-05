@@ -1,5 +1,6 @@
 import type { DataConnection, Peer } from 'peerjs';
 import type { ClientMsg, HostMsg } from './protocol';
+import { ICE_SERVERS } from './iceConfig';
 
 // Thin host transport over PeerJS (WebRTC DataChannels). Signalling goes through
 // the PeerJS broker (default: their free cloud — needs internet for the handshake);
@@ -39,7 +40,7 @@ export class NetHost {
     try {
       const { Peer } = await import('peerjs');
       if (this.closed) return;
-      this.peer = new Peer(PREFIX + this.code);
+      this.peer = new Peer(PREFIX + this.code, { config: { iceServers: ICE_SERVERS } });
       this.peer.on('open', () => this.cb.onReady(this.code));
       this.peer.on('connection', (conn) => this.handleConn(conn));
       this.peer.on('error', (e: { type?: string; message?: string }) => {
