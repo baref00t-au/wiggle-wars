@@ -22,7 +22,13 @@ export interface WifiPlayer {
   connId?: string;
 }
 
-const BROADCAST_EVERY = 2; // frames between deltas (~30 Hz at 60 fps)
+// Frames between deltas. Bigger games send less often so the host's upload (one
+// stream per client) stays sane: ~30 Hz up to 8 players, ~20 Hz to 16, ~15 Hz to 32.
+function broadcastEveryFor(n: number): number {
+  if (n > 16) return 4;
+  if (n > 8) return 3;
+  return 2;
+}
 const ADVANCE_DELAY_MS = 800;
 const GO_FLASH_MS = 600;
 
@@ -54,6 +60,7 @@ export class LocalWifiHost {
   private prevStatus: GameState['status'] = 'countdown';
   private disposed = false;
   private wasFullscreen = false;
+  private broadcastEvery: number;
 
   constructor(
     private container: HTMLElement,
@@ -69,8 +76,16 @@ export class LocalWifiHost {
     this.canvas.id = 'game';
     container.append(this.canvas);
 
+    this.broadcastEvery = broadcastEveryFor(players.length);
+
     const settings = loadSettings();
+    // Grow the arena with the crowd so 16–32 lines aren't packed into a 4-player
+    // box: scale each side by √(players/4), keeping the play area per line roughly
+    // constant. The renderer fits this to the screen, so big games just zoom out.
+    const sizeScale = Math.sqrt(Math.max(1, players.length / 4));
     const config = makeConfig({
+      arenaWidth: Math.round(1600 * sizeScale),
+      arenaHeight: Math.round(900 * sizeScale),
       targetScore: settings.targetScore,
       speed: settings.speed,
       turnRate: settings.speed / settings.turnRadius,
@@ -255,7 +270,7 @@ export class LocalWifiHost {
     this.prevStatus = state.status;
 
     // Broadcast a compact delta a few times a second.
-    if (++this.frame % BROADCAST_EVERY === 0) {
+    if (++this.frame % this.broadcastEvery === 0) {
       const out = buildDelta(state, this.sent);
       this.sent = out.sent;
       this.netHost.broadcast(out.msg);

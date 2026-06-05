@@ -9,7 +9,7 @@ import type { WifiPlayer } from '../modes/localWifiHost';
 // same WiFi; signalling briefly uses the PeerJS broker (needs internet), then play
 // is device-to-device. See the privacy note in for-teachers.md / ETHICS.md.
 
-const MAX_CLIENTS = 3; // + the host = 4 players
+const MAX_CLIENTS = 31; // + the host = up to 32 players
 
 export interface LobbyCallbacks {
   onHost: (netHost: NetHost, players: WifiPlayer[]) => void;

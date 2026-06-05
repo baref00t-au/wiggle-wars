@@ -22,18 +22,47 @@ export interface PlayerColor {
   glyph: string;
 }
 
-export const PALETTE: PlayerColor[] = [
-  { name: 'Blue', line: '#56B4E9', head: '#A8DCF6', shape: 'circle', glyph: '●' },
-  { name: 'Orange', line: '#E69F00', head: '#FFC94D', shape: 'triangle', glyph: '▲' },
-  { name: 'Green', line: '#009E73', head: '#5FD7B4', shape: 'square', glyph: '■' },
-  { name: 'Yellow', line: '#F0E442', head: '#F8F19A', shape: 'diamond', glyph: '◆' },
-  { name: 'Red', line: '#D55E00', head: '#FF9A57', shape: 'star', glyph: '★' },
-  { name: 'Purple', line: '#CC79A7', head: '#E9B6D2', shape: 'hexagon', glyph: '⬢' },
+interface ColorDef {
+  name: string;
+  line: string;
+  head: string;
+}
+
+const COLORS: ColorDef[] = [
+  { name: 'Blue', line: '#56B4E9', head: '#A8DCF6' },
+  { name: 'Orange', line: '#E69F00', head: '#FFC94D' },
+  { name: 'Green', line: '#009E73', head: '#5FD7B4' },
+  { name: 'Yellow', line: '#F0E442', head: '#F8F19A' },
+  { name: 'Red', line: '#D55E00', head: '#FF9A57' },
+  { name: 'Purple', line: '#CC79A7', head: '#E9B6D2' },
 ];
+
+const SHAPES: { shape: PlayerShape; glyph: string }[] = [
+  { shape: 'circle', glyph: '●' },
+  { shape: 'triangle', glyph: '▲' },
+  { shape: 'square', glyph: '■' },
+  { shape: 'diamond', glyph: '◆' },
+  { shape: 'star', glyph: '★' },
+  { shape: 'hexagon', glyph: '⬢' },
+];
+
+/** The colour choices offered in the same-device menu (one per base colour). */
+export const PALETTE = COLORS;
 
 export const ARENA_FILL = '#15172a';
 export const ARENA_BORDER = '#3a3f63';
 
+/**
+ * Identity for player `index`. The first 6 are the distinct colour+shape pairs
+ * (Blue circle, Orange triangle, …). Beyond that, colour and shape advance on a
+ * diagonal so every (colour, shape) pair is unique — 6×6 = 36 distinct identities,
+ * enough for big WiFi/online games, all using the colour-blind-safe colours.
+ */
 export function colorFor(index: number): PlayerColor {
-  return PALETTE[((index % PALETTE.length) + PALETTE.length) % PALETTE.length];
+  const n = COLORS.length;
+  const ci = ((index % n) + n) % n;
+  const si = (((ci + Math.floor(index / n)) % SHAPES.length) + SHAPES.length) % SHAPES.length;
+  const c = COLORS[ci];
+  const s = SHAPES[si];
+  return { name: c.name, line: c.line, head: c.head, shape: s.shape, glyph: s.glyph };
 }

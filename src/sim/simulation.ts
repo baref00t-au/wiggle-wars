@@ -63,7 +63,12 @@ export function makeConfig(overrides: Partial<GameConfig> = {}): GameConfig {
 /** Place players: fixed spawn if provided, else seeded-random with separation. */
 function spawnPlayers(specs: PlayerSpec[], config: GameConfig, rng: Rng): Player[] {
   const margin = Math.max(60, Math.min(config.arenaWidth, config.arenaHeight) * 0.08);
-  const minSep = Math.min(config.arenaWidth, config.arenaHeight) * 0.18;
+  // Keep spawns apart, but shrink the required separation as the field grows so
+  // 16–32 players still fit: cap at 18% of the short side, and never ask for more
+  // than ~55% of the average spacing if the arena were evenly tiled.
+  const n = Math.max(1, specs.length);
+  const evenSpacing = Math.sqrt((config.arenaWidth * config.arenaHeight) / n);
+  const minSep = Math.min(Math.min(config.arenaWidth, config.arenaHeight) * 0.18, evenSpacing * 0.55);
   const placed: { x: number; y: number }[] = [];
 
   return specs.map((spec) => {
