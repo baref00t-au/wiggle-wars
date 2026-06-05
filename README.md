@@ -1,5 +1,11 @@
 # Wiggle Wars
 
+### ▶ Play now: **https://baref00t-au.github.io/wiggle-wars/**
+
+Open it on a phone, tablet, Chromebook, or laptop. On Android (Chrome) or iPad
+(Safari) you can **Add to Home Screen** to install it as a full-screen app that
+**works offline**.
+
 A browser-based, classroom-friendly multiplayer "growing line" game. Each player
 steers a continuously-growing line **left or right only**; you lose if you hit a
 wall, another trail, or your own.
