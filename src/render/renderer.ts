@@ -1,5 +1,21 @@
-import type { GameState } from '../sim/types';
+import type { RoundStatus, TrailSegment } from '../sim/types';
 import { ARENA_BORDER, ARENA_FILL, colorFor, type PlayerShape } from './colors';
+
+/** The minimal read-only view the renderer needs. The host's GameState satisfies
+ *  it directly; a Phase 4 client reconstructs one from network deltas. */
+export interface RenderState {
+  config: { lineThickness: number };
+  status: RoundStatus;
+  players: Array<{
+    id: string;
+    colorIndex: number;
+    x: number;
+    y: number;
+    heading: number;
+    alive: boolean;
+    trail: TrailSegment[];
+  }>;
+}
 
 /** Death effect duration, in wall-clock ms. Driven by the clock (not sim ticks)
  *  so it still animates after the final death freezes the simulation. */
@@ -41,7 +57,7 @@ export class Renderer {
     this.offsetY = (cssH - this.arenaH * this.scale) / 2;
   }
 
-  draw(state: GameState): void {
+  draw(state: RenderState): void {
     const ctx = this.ctx;
     const now = performance.now();
 

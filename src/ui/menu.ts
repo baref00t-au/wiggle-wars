@@ -40,6 +40,7 @@ export function renderMenu(
   container: HTMLElement,
   onStart: (setup: MatchSetup) => void,
   onLearn: () => void,
+  onWifi: () => void,
 ): () => void {
   const saved = loadSettings();
   let count = saved.count;
@@ -226,6 +227,11 @@ export function renderMenu(
       onStart({ players, targetScore, difficulty, speed, turnRadius });
     });
     wrap.append(start);
+
+    const wifi = el('button', 'btn learn-link', '📡 Same-WiFi');
+    wifi.title = 'Play on separate devices on the same WiFi';
+    wifi.addEventListener('click', onWifi);
+    wrap.append(wifi);
 
     const learn = el('button', 'btn learn-link', '📚 Learn');
     learn.title = 'Spot the tricks games use, and how this one works';

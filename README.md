@@ -31,8 +31,10 @@ counter-example to teach kids to recognise these tricks.
   muted-by-default sound, settings saved locally. **Ready to test with students.**
   - **AI players:** any slot can be a bot (at least 1 human). Bots steer by
     lookahead over a coarse occupancy grid — see `src/ai/`.
-- Phase 4 — Same-WiFi multiplayer: not started (do not start until Phase 3 is
-  tried with real students).
+- **Phase 4 — Same-WiFi multiplayer:** ✅ done. Host-authoritative netcode over
+  WebRTC (PeerJS): a lobby with a room code, one device hosts the authoritative sim
+  and broadcasts compact trail deltas, clients render and send only their steering.
+  See `src/net/` (the sync protocol is unit-tested in `tests/protocol.test.ts`).
 
 ## Architecture rule
 

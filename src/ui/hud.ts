@@ -1,6 +1,12 @@
-import type { GameState } from '../sim/types';
 import { colorFor } from '../render/colors';
 import { el } from './dom';
+
+/** The minimal view the scoreboard needs — both the host GameState and a Phase 4
+ *  client's reconstructed state satisfy it. */
+export interface ScoreState {
+  config: { targetScore: number };
+  players: { id: string; colorIndex: number; name: string; alive: boolean; score: number }[];
+}
 
 export interface HudButton {
   label: string;
@@ -34,7 +40,7 @@ export class Hud {
     container.append(this.root);
   }
 
-  renderScores(state: GameState, aiIds?: Set<string>): void {
+  renderScores(state: ScoreState, aiIds?: Set<string>): void {
     this.scoreboard.replaceChildren();
     this.scoreboard.append(el('div', 'target', `First to ${state.config.targetScore}`));
     for (const p of state.players) {

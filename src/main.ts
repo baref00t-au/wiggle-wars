@@ -5,7 +5,10 @@
 import { renderMenu } from './ui/menu';
 import type { MatchSetup } from './ui/menu';
 import { renderLearn } from './ui/learn';
+import { renderLobby } from './ui/lobby';
 import { SameDeviceMode } from './modes/sameDevice';
+import { LocalWifiHost } from './modes/localWifiHost';
+import { LocalWifiClient } from './modes/localWifiClient';
 import { Sfx } from './audio/sfx';
 import { el } from './ui/dom';
 import { loadSettings, patchSettings } from './settings';
@@ -59,12 +62,31 @@ function clearScreen(): void {
 
 function showMenu(): void {
   clearScreen();
-  cleanup = renderMenu(app!, startMatch, showLearn);
+  cleanup = renderMenu(app!, startMatch, showLearn, showWifi);
 }
 
 function showLearn(): void {
   clearScreen();
   cleanup = renderLearn(app!, showMenu);
+}
+
+function showWifi(): void {
+  clearScreen();
+  cleanup = renderLobby(app!, {
+    onHost: (netHost, players) => {
+      clearScreen();
+      const mode = new LocalWifiHost(app!, netHost, players, sfx, showMenu);
+      mode.start();
+      cleanup = () => mode.dispose();
+    },
+    onClient: (netClient, myPlayerId, reset) => {
+      clearScreen();
+      const mode = new LocalWifiClient(app!, netClient, myPlayerId, reset, showMenu);
+      mode.start();
+      cleanup = () => mode.dispose();
+    },
+    onExit: showMenu,
+  });
 }
 
 function startMatch(setup: MatchSetup): void {

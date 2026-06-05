@@ -52,6 +52,12 @@ strict. This file is a hard checklist for anyone who touches the code later.
 - **Collect nothing.** No analytics, no trackers, no network calls during local play.
   Settings (sound, colours, difficulty) are stored only on the device; nicknames are
   never stored at all.
+- **Same-WiFi play (optional) is honest about its one network use.** To connect
+  devices, the initial handshake briefly uses a WebRTC signalling broker (by default
+  PeerJS's free cloud broker — so that step needs internet); after that, **gameplay
+  data is device-to-device**, never via a server. No student data is sent or stored.
+  For a fully-offline LAN, the tiny PeerJS broker can be self-hosted. This is the one
+  documented trade-off; everything else stays local.
 
 See [`docs/lesson-spot-the-trick.md`](docs/lesson-spot-the-trick.md) for the
 classroom lesson that uses this game as the honest counter-example.
