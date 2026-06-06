@@ -1008,6 +1008,11 @@ body {
 .touch-region {
   position: absolute;
   display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgba(10, 12, 24, 0.32);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
 }
 
 /* Far-side players (bottom row of the 4-player layout) — rotate so the arrows
@@ -1022,8 +1027,9 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 7vmin;
+  border-radius: 12px;
   color: var(--tint);
-  opacity: 0.5;
+  opacity: 0.62;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: radial-gradient(
     circle at center,

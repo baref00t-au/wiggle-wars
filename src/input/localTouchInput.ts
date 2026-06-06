@@ -20,35 +20,38 @@ interface Rect {
 }
 
 /**
- * Per-player screen regions, each split into a left-turn and right-turn half.
- * 2 players share the screen as columns; 3 as thirds; 4 as quadrants (corners).
- * Zones are deliberately large and obvious — kids, fast fingers.
+ * Compact control pads anchored to the screen edges/corners so the play area
+ * stays fully visible. Each pad is split into a left-turn and right-turn half.
+ *  - 1 player: bottom-centre.
+ *  - 2 players: bottom-centre + top-centre (the far side, flipped).
+ *  - 3 players: bottom-left & bottom-right corners + top-centre (flipped).
+ *  - 4 players: the four corners; the top (far-side) pair is flipped.
+ * `flip` rotates a pad 180° so its arrows/name read right-way-up for a player
+ * seated across a flat tablet. Coordinates are percentages of the viewport.
  */
 function layoutFor(n: number): Rect[] {
   if (n <= 1) {
-    // Solo human (the rest are bots) gets the whole screen: left half turns
-    // left, right half turns right.
-    return [{ x: 0, y: 0, w: 100, h: 100, flip: false }];
+    return [{ x: 27, y: 72, w: 46, h: 26, flip: false }]; // bottom-centre
   }
   if (n === 2) {
     return [
-      { x: 0, y: 0, w: 50, h: 100, flip: false },
-      { x: 50, y: 0, w: 50, h: 100, flip: false },
+      { x: 27, y: 72, w: 46, h: 26, flip: false }, // bottom-centre (near)
+      { x: 27, y: 2, w: 46, h: 26, flip: true }, //  top-centre (far)
     ];
   }
   if (n === 3) {
     return [
-      { x: 0, y: 0, w: 33.34, h: 100, flip: false },
-      { x: 33.33, y: 0, w: 33.34, h: 100, flip: false },
-      { x: 66.66, y: 0, w: 33.34, h: 100, flip: false },
+      { x: 2, y: 64, w: 38, h: 34, flip: false }, //  bottom-left
+      { x: 60, y: 64, w: 38, h: 34, flip: false }, // bottom-right
+      { x: 31, y: 2, w: 38, h: 34, flip: true }, //   top-centre (far)
     ];
   }
-  // 4 players sit around the tablet — flip the bottom row for the far side.
+  // 4 players around the tablet — the corners; far (top) row flipped.
   return [
-    { x: 0, y: 0, w: 50, h: 50, flip: false },
-    { x: 50, y: 0, w: 50, h: 50, flip: false },
-    { x: 0, y: 50, w: 50, h: 50, flip: true },
-    { x: 50, y: 50, w: 50, h: 50, flip: true },
+    { x: 2, y: 58, w: 38, h: 40, flip: false }, //  bottom-left (near)
+    { x: 60, y: 58, w: 38, h: 40, flip: false }, // bottom-right (near)
+    { x: 2, y: 2, w: 38, h: 40, flip: true }, //    top-left (far)
+    { x: 60, y: 2, w: 38, h: 40, flip: true }, //   top-right (far)
   ];
 }
 
