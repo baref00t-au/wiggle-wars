@@ -470,6 +470,16 @@ textarea {
   color: var(--ink-faintest);
 }
 
+.home-foot-link {
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.home-foot-link:hover {
+  color: var(--accent);
+}
+
 /* ---------- Set up match ---------- */
 
 .setup {

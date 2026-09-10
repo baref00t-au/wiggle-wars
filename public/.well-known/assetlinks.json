@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "au.baref00t.wigglewars.twa",
+      "sha256_cert_fingerprints": [
+        "F9:F8:13:73:60:1C:A5:ED:25:A9:1E:6F:D7:C0:DE:DE:B9:E6:AB:CC:B6:FD:70:D6:D0:83:AB:EF:74:D0:C5:56"
+      ]
+    }
+  }
+]
