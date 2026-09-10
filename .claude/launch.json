@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "android-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "preview", "--config", "vite.config.android.ts", "--outDir", "dist-android", "--port", "4173", "--strictPort"],
+      "port": 4173
     }
   ]
 }
