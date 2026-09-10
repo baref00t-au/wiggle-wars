@@ -20,6 +20,9 @@ export interface RenderState {
 /** Death effect duration, in wall-clock ms. Driven by the clock (not sim ticks)
  *  so it still animates after the final death freezes the simulation. */
 const DEATH_FX_MS = 650;
+/** Render-only stroke multiplier: the sim/collision constant stays at 3 units, but
+ *  at phone sizes that is ~1.3 CSS px — too thin for kids to follow. */
+const STROKE_SCALE = 2;
 
 /**
  * Draws a GameState onto a canvas. Read-only: never mutates state. The sim runs
@@ -74,7 +77,7 @@ export class Renderer {
     ctx.strokeStyle = ARENA_BORDER;
     ctx.strokeRect(0, 0, this.arenaW, this.arenaH);
 
-    const thickness = state.config.lineThickness;
+    const thickness = state.config.lineThickness * STROKE_SCALE;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 

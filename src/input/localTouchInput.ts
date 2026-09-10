@@ -9,52 +9,26 @@ export interface TouchPlayer {
   name: string;
 }
 
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  /** Rotate the region 180° so it reads right-way-up for a player on the far
-   *  side of a flat tablet (the bottom-row quadrants in 4-player). */
-  flip: boolean;
+/** Where the fixed-size pads sit. `corners` seats the far pair across a flat
+ *  tablet (rotated 180°); `edges` keeps every pad readable one-handed in phone
+ *  landscape by pinning players 3–4 to the left / right edges. */
+export type PadLayout = 'corners' | 'edges';
+
+/** CSS placement class per seat; see .pad.seat-* in style.css. */
+const CORNER_SEATS = ['seat-bl', 'seat-br', 'seat-tl flipped', 'seat-tr flipped'];
+const EDGE_SEATS = ['seat-bl', 'seat-br', 'seat-l', 'seat-r'];
+
+function seatsFor(n: number, layout: PadLayout): string[] {
+  if (n <= 1) return ['seat-bc'];
+  return (layout === 'edges' ? EDGE_SEATS : CORNER_SEATS).slice(0, n);
 }
 
 /**
- * Compact control pads anchored to the screen edges/corners so the play area
- * stays fully visible. Each pad is split into a left-turn and right-turn half.
- *  - 1 player: bottom-centre.
- *  - 2 players: bottom-centre + top-centre (the far side, flipped).
- *  - 3 players: bottom-left & bottom-right corners + top-centre (flipped).
- *  - 4 players: the four corners; the top (far-side) pair is flipped.
- * `flip` rotates a pad 180° so its arrows/name read right-way-up for a player
- * seated across a flat tablet. Coordinates are percentages of the viewport.
+ * Fixed-size steering pads (two 56px-tall zones each) anchored to the screen
+ * corners, so on a tablet they take roughly a tenth of the screen instead of a
+ * third. Each pad is split into a left-turn and right-turn zone; several
+ * fingers per zone are counted so a rest-then-tap doesn't drop the turn.
  */
-function layoutFor(n: number): Rect[] {
-  if (n <= 1) {
-    return [{ x: 27, y: 72, w: 46, h: 26, flip: false }]; // bottom-centre
-  }
-  if (n === 2) {
-    return [
-      { x: 27, y: 72, w: 46, h: 26, flip: false }, // bottom-centre (near)
-      { x: 27, y: 2, w: 46, h: 26, flip: true }, //  top-centre (far)
-    ];
-  }
-  if (n === 3) {
-    return [
-      { x: 2, y: 64, w: 38, h: 34, flip: false }, //  bottom-left
-      { x: 60, y: 64, w: 38, h: 34, flip: false }, // bottom-right
-      { x: 31, y: 2, w: 38, h: 34, flip: true }, //   top-centre (far)
-    ];
-  }
-  // 4 players around the tablet — the corners; far (top) row flipped.
-  return [
-    { x: 2, y: 58, w: 38, h: 40, flip: false }, //  bottom-left (near)
-    { x: 60, y: 58, w: 38, h: 40, flip: false }, // bottom-right (near)
-    { x: 2, y: 2, w: 38, h: 40, flip: true }, //    top-left (far)
-    { x: 60, y: 2, w: 38, h: 40, flip: true }, //   top-right (far)
-  ];
-}
-
 export class LocalTouchInput implements InputSource {
   private layer: HTMLElement;
   /** Per player, how many active pointers hold each direction. */
@@ -65,29 +39,25 @@ export class LocalTouchInput implements InputSource {
   constructor(
     container: HTMLElement,
     private players: TouchPlayer[],
+    layout: PadLayout = 'corners',
   ) {
     this.layer = el('div', 'touch-layer');
-    const rects = layoutFor(players.length);
+    const seats = seatsFor(players.length, layout);
+    const wide = players.length <= 2;
 
     players.forEach((p, i) => {
-      const r = rects[i];
       this.turns.set(p.id, { left: 0, right: 0 });
-
-      const region = el('div', `touch-region${r.flip ? ' flipped' : ''}`);
-      region.style.left = `${r.x}%`;
-      region.style.top = `${r.y}%`;
-      region.style.width = `${r.w}%`;
-      region.style.height = `${r.h}%`;
-
       const col = colorFor(p.colorIndex);
-      const name = el('div', 'touch-name', p.name);
+
+      const pad = el('div', `pad ${seats[i]}${wide ? ' wide' : ''}`);
+      const name = el('div', 'pad-name', p.name);
       name.style.color = col.head;
-      region.append(
+      pad.append(
         this.makeZone(p.id, 'left', '◀', col.line),
         this.makeZone(p.id, 'right', '▶', col.line),
         name,
       );
-      this.layer.append(region);
+      this.layer.append(pad);
     });
 
     container.append(this.layer);
@@ -101,7 +71,7 @@ export class LocalTouchInput implements InputSource {
     glyph: string,
     tint: string,
   ): HTMLElement {
-    const zone = el('div', `touch-zone ${dir}`, glyph);
+    const zone = el('div', `pad-zone ${dir}`, glyph);
     zone.style.setProperty('--tint', tint);
     zone.addEventListener('pointerdown', (e) => this.onPointerDown(e, playerId, dir, zone));
     return zone;
@@ -143,7 +113,7 @@ export class LocalTouchInput implements InputSource {
       t.left = 0;
       t.right = 0;
     }
-    this.layer.querySelectorAll('.touch-zone.active').forEach((z) => z.classList.remove('active'));
+    this.layer.querySelectorAll('.pad-zone.active').forEach((z) => z.classList.remove('active'));
   }
 
   getInputs(): Input[] {

@@ -15,83 +15,115 @@ export interface HudButton {
 }
 
 export interface HudMessage {
+  /** Small caps line above the title ("ROUND 3", "MATCH OVER"). */
+  eyebrow?: string;
   title: string;
   titleColor?: string;
   subtitle?: string;
+  /** When given, a row of glyph + score chips is shown under the title. */
+  scores?: ScoreState;
+  /** Match-over treatment: accent border, heavier scrim, bigger title. */
   celebrate?: boolean;
   buttons?: HudButton[];
 }
 
 /**
- * The on-screen overlay: a top scoreboard plus a centre area for the countdown,
- * round/match results, and buttons. Pure presentation — it reads state and the
- * mode's instructions, and never touches the simulation.
+ * The on-screen overlay: a compact score rail at the top plus a centre area for
+ * the countdown and the round / match result cards. Pure presentation — it
+ * reads state and the mode's instructions, and never touches the simulation.
  */
 export class Hud {
   private root: HTMLElement;
-  private scoreboard: HTMLElement;
+  private rail: HTMLElement;
   private centre: HTMLElement;
+  private lastCount: string | null = null;
 
   constructor(container: HTMLElement) {
     this.root = el('div', 'hud');
-    this.scoreboard = el('div', 'scoreboard');
+    this.rail = el('div', 'score-rail');
     this.centre = el('div', 'centre');
-    this.root.append(this.scoreboard, this.centre);
+    this.root.append(this.rail, this.centre);
     container.append(this.root);
   }
 
-  renderScores(state: ScoreState, aiIds?: Set<string>): void {
-    this.scoreboard.replaceChildren();
-    this.scoreboard.append(el('div', 'target', `First to ${state.config.targetScore}`));
+  /** Glyph + score per player. Names are deliberately omitted — they sit on each
+   *  player's pad — so the rail never wraps into the top pads on a phone. */
+  renderScores(state: ScoreState, _aiIds?: Set<string>): void {
+    this.rail.replaceChildren();
+    this.rail.append(el('span', 'rail-target', `FIRST TO ${state.config.targetScore}`));
     for (const p of state.players) {
       const col = colorFor(p.colorIndex);
-      const chip = el('div', `score-chip${p.alive ? '' : ' dead'}`);
-      const marker = el('span', 'dot-glyph', col.glyph);
-      marker.style.color = col.line;
-      chip.append(marker, el('span', 'name', p.name));
-      if (aiIds?.has(p.id)) chip.append(el('span', 'ai-badge', '🤖'));
-      chip.append(el('span', 'score', String(p.score)));
-      this.scoreboard.append(chip);
+      const chip = el('span', `rail-chip${p.alive ? '' : ' dim'}`);
+      chip.title = p.name;
+      const glyph = el('span', 'glyph', col.glyph);
+      glyph.style.color = col.line;
+      chip.append(glyph, el('span', 'score', String(p.score)));
+      this.rail.append(chip);
     }
   }
 
   showCountdown(secs: number): void {
-    this.centre.className = 'centre show countdown';
-    this.centre.replaceChildren(el('div', 'big', secs > 0 ? String(secs) : 'GO!'));
+    this.showCount(secs > 0 ? String(secs) : 'GO!');
   }
 
   showGo(): void {
+    this.showCount('GO!');
+  }
+
+  /** Re-renders only when the numeral changes, so the pop animation plays once per step. */
+  private showCount(text: string): void {
+    if (this.centre.classList.contains('countdown') && this.lastCount === text) return;
+    this.lastCount = text;
     this.centre.className = 'centre show countdown';
-    this.centre.replaceChildren(el('div', 'big go', 'GO!'));
+    this.centre.replaceChildren(el('div', 'count-num', text));
   }
 
   showMessage(msg: HudMessage): void {
-    this.centre.className = `centre show${msg.celebrate ? ' celebrate' : ''}`;
-    const box = el('div', 'message');
+    this.lastCount = null;
+    this.centre.className = `centre show ${msg.celebrate ? 'match' : 'round'}`;
+    const card = el('div', `result-card${msg.celebrate ? ' match' : ''}`);
 
-    const title = el('div', 'title', msg.title);
+    if (msg.eyebrow) card.append(el('div', 'eyebrow', msg.eyebrow));
+
+    const title = el('div', 'result-title', msg.title);
     if (msg.titleColor) title.style.color = msg.titleColor;
-    box.append(title);
+    card.append(title);
 
-    if (msg.subtitle) box.append(el('div', 'subtitle', msg.subtitle));
+    if (msg.subtitle) card.append(el('div', 'result-body', msg.subtitle));
+
+    if (msg.scores) {
+      const row = el('div', 'result-scores');
+      for (const p of msg.scores.players) {
+        const col = colorFor(p.colorIndex);
+        const chip = el('span', 'result-chip');
+        chip.title = p.name;
+        const glyph = el('span', 'glyph', col.glyph);
+        glyph.style.color = col.line;
+        chip.append(glyph, el('span', 'score', String(p.score)));
+        row.append(chip);
+      }
+      card.append(row);
+    }
 
     if (msg.buttons && msg.buttons.length > 0) {
-      const row = el('div', 'buttons');
+      const row = el('div', 'result-buttons');
       for (const b of msg.buttons) {
-        const btn = el('button', `btn${b.primary ? ' primary' : ''}`, b.label);
+        const btn = el('button', b.primary ? 'btn-primary' : 'btn-secondary', b.label);
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           b.onClick();
         });
+        btn.addEventListener('pointerdown', (e) => e.stopPropagation());
         row.append(btn);
       }
-      box.append(row);
+      card.append(row);
     }
 
-    this.centre.replaceChildren(box);
+    this.centre.replaceChildren(card);
   }
 
   clearCentre(): void {
+    this.lastCount = null;
     this.centre.className = 'centre';
     this.centre.replaceChildren();
   }
