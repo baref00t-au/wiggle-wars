@@ -9,7 +9,7 @@ import { AiInput } from '../ai/aiInput';
 import { GameLoop } from './gameLoop';
 import { Hud } from '../ui/hud';
 import { el } from '../ui/dom';
-import type { MatchSetup } from '../ui/menu';
+import type { MatchSetup } from '../ui/setup';
 import type { Sfx } from '../audio/sfx';
 import { store } from '../learn/store';
 
@@ -23,7 +23,7 @@ type Phase = 'running' | 'roundOver' | 'matchOver';
 /** How long after a round ends before a tap counts as "next round" — lets the
  *  death effect play and avoids the crashing tap skipping the result screen. */
 const ADVANCE_DELAY_MS = 800;
-const GO_FLASH_MS = 600;
+const GO_FLASH_MS = 800;
 
 /**
  * Drives a full same-device match: wires the shared simulation to the renderer,
@@ -46,8 +46,11 @@ export class SameDeviceMode {
   private wasFullscreen = false;
   private paused = false;
   private pauseEl: HTMLElement | null = null;
-  /** Rounds finished this match (read by the app for the post-session reflection). */
+  private controls: HTMLElement;
+  /** Rounds finished this session of play (read by the app for the post-session reflection). */
   roundsPlayed = 0;
+  /** Rounds finished in the current match (resets on "Play again"). */
+  private matchRounds = 0;
 
   private seed: number;
   private phase: Phase = 'running';
@@ -91,6 +94,20 @@ export class SameDeviceMode {
     );
     this.ai = new AiInput(bots.map((p) => p.id), config, setup.difficulty);
     this.input = new MergedInput([this.keyboard, this.touch, this.ai]);
+
+    // Bottom-centre control cluster: just the pause button, kept clear of the
+    // corner pads. Pausing also offers the touch-only way back to the menu.
+    this.controls = el('div', 'play-controls');
+    const pause = el('button', 'pause-btn', '⏸');
+    pause.title = 'Pause (P)';
+    pause.setAttribute('aria-label', 'Pause');
+    pause.addEventListener('pointerdown', (e) => e.stopPropagation());
+    pause.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.togglePause();
+    });
+    this.controls.append(pause);
+    container.append(this.controls);
 
     this.loop = new GameLoop({
       initialState: state,
@@ -137,6 +154,7 @@ export class SameDeviceMode {
     this.input.dispose();
     this.hud.dispose();
     this.pauseEl?.remove();
+    this.controls.remove();
     this.canvas.remove();
   }
 
@@ -184,11 +202,28 @@ export class SameDeviceMode {
   };
 
   private togglePause(): void {
+    if (this.phase === 'matchOver') return;
     this.paused = !this.paused;
     if (this.paused) {
       this.loop.stop();
-      this.pauseEl = el('div', 'pause-overlay', '⏸  Paused — press P to resume');
-      this.container.append(this.pauseEl);
+      const overlay = el('div', 'pause-overlay');
+      overlay.addEventListener('pointerdown', (e) => e.stopPropagation());
+      const card = el('div', 'result-card');
+      card.append(
+        el('div', 'eyebrow', 'PAUSED'),
+        el('div', 'result-title', 'Take a breath'),
+        el('div', 'result-body', 'Press P or tap Resume to keep going.'),
+      );
+      const row = el('div', 'result-buttons');
+      const menu = el('button', 'btn-secondary', 'Menu');
+      menu.addEventListener('click', () => this.quit());
+      const resume = el('button', 'btn-primary', 'Resume');
+      resume.addEventListener('click', () => this.togglePause());
+      row.append(menu, resume);
+      card.append(row);
+      overlay.append(card);
+      this.container.append(overlay);
+      this.pauseEl = overlay;
     } else {
       this.pauseEl?.remove();
       this.pauseEl = null;
@@ -217,6 +252,7 @@ export class SameDeviceMode {
 
   private rematch(): void {
     this.seed += 1;
+    this.matchRounds = 0;
     this.loop.setState(createInitialState(this.config(), this.specs(), this.seed));
     this.enterRunning();
   }
@@ -262,6 +298,7 @@ export class SameDeviceMode {
         this.advanceReadyAt = now + ADVANCE_DELAY_MS;
         this.touch.setVisible(false);
         this.roundsPlayed += 1;
+        this.matchRounds += 1;
         this.recordSurvival(state);
 
         // Auto difficulty: rubber-band toward the human's level each round.
@@ -294,11 +331,15 @@ export class SameDeviceMode {
   private showRoundOver(state: GameState, note?: string): void {
     const winner = state.players.find((p) => p.id === state.roundWinnerId);
     this.hud.showMessage({
-      title: winner ? `${winner.name} wins the round!` : 'Draw!',
+      eyebrow: `ROUND ${this.matchRounds}`,
+      title: winner ? `${winner.name} takes it` : 'Nobody takes it',
       titleColor: winner ? colorFor(winner.colorIndex).head : undefined,
-      subtitle: note
-        ? `${note} · Tap or Space to continue`
-        : 'Tap or press Space for the next round',
+      subtitle: note,
+      scores: state,
+      buttons: [
+        { label: 'Menu', onClick: () => this.quit() },
+        { label: 'Next round', primary: true, onClick: () => this.nextRound() },
+      ],
     });
   }
 
@@ -334,14 +375,19 @@ export class SameDeviceMode {
     const winner = state.players.find((p) => p.id === state.matchWinnerId);
     const skill = store.skill();
     const secs = skill && skill.day === todayKey() ? skill.bestTicksToday / state.config.tickRate : 0;
+    const rounds = `${this.matchRounds} round${this.matchRounds === 1 ? '' : 's'}`;
+    // The honest inverse of a re-engagement nag — keep this line.
+    let body = `First to ${state.config.targetScore} after ${rounds}. Nothing was saved, nothing is nagging you to play again.`;
+    if (secs > 0) body += ` Your longest survival today: ${secs.toFixed(1)}s.`;
     this.hud.showMessage({
-      title: winner ? `${winner.name} wins the match!` : 'Game over',
+      eyebrow: 'MATCH OVER',
+      title: winner ? `${winner.name} wins` : 'Game over',
       titleColor: winner ? colorFor(winner.colorIndex).head : undefined,
-      subtitle: secs > 0 ? `🏅 Your longest survival today: ${secs.toFixed(1)}s` : undefined,
+      subtitle: body,
       celebrate: true,
       buttons: [
+        { label: 'Menu', onClick: () => this.quit() },
         { label: 'Play again', primary: true, onClick: () => this.rematch() },
-        { label: 'New game', onClick: () => this.quit() },
       ],
     });
   }

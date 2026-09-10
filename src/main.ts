@@ -1,9 +1,10 @@
-// App entry: show the menu, run a same-device match, return to the menu on exit.
-// The only data kept is local gameplay settings (see settings.ts) — no nicknames,
-// no analytics, no network.
+// App entry: home carousel → set up match → play, plus the WiFi lobby and Learn
+// hub. The only data kept is local gameplay settings (see settings.ts) — no
+// nicknames, no analytics, no network (except the WiFi/online handshake).
 
-import { renderMenu } from './ui/menu';
-import type { MatchSetup } from './ui/menu';
+import { renderHome } from './ui/home';
+import { renderSetup } from './ui/setup';
+import type { MatchSetup } from './ui/setup';
 import { renderLearn } from './ui/learn';
 import { renderLobby } from './ui/lobby';
 import { SameDeviceMode } from './modes/sameDevice';
@@ -33,19 +34,17 @@ function unlockAudioOnce(): void {
 window.addEventListener('pointerdown', unlockAudioOnce);
 window.addEventListener('keydown', unlockAudioOnce);
 
-// Persistent sound toggle (muted by default for classrooms).
-const muteBtn = el('button', 'mute-btn', sfx.isMuted ? '🔇' : '🔊');
-muteBtn.title = 'Sound on / off';
-muteBtn.addEventListener('click', () => {
+/** Persistent sound toggle (muted by default for classrooms). Returns the new muted state. */
+function toggleSound(): boolean {
   const muted = sfx.toggle();
-  muteBtn.textContent = muted ? '🔇' : '🔊';
   patchSettings({ muted });
-});
-document.body.append(muteBtn);
+  return muted;
+}
 
-// Only one screen (menu, learn, or game) is mounted at a time; `cleanup` tears
-// down whatever is currently up before the next one mounts.
+// Only one screen (home, setup, learn, lobby, or game) is mounted at a time;
+// `cleanup` tears down whatever is currently up before the next one mounts.
 let cleanup: (() => void) | null = null;
+let homeMode = 0; // carousel panel to return to (session-only)
 let reflectionShown = false; // at most once per session (in-memory only)
 let reflectionEl: HTMLElement | null = null;
 
@@ -60,14 +59,29 @@ function clearScreen(): void {
   removeReflection();
 }
 
-function showMenu(): void {
+function showHome(): void {
   clearScreen();
-  cleanup = renderMenu(app!, startMatch, showLearn, showWifi);
+  cleanup = renderHome(app!, {
+    mode: homeMode,
+    muted: sfx.isMuted,
+    onToggleSound: toggleSound,
+    onModeChange: (m) => {
+      homeMode = m;
+    },
+    onSameDevice: showSetup,
+    onWifi: showWifi,
+    onLearn: showLearn,
+  });
+}
+
+function showSetup(): void {
+  clearScreen();
+  cleanup = renderSetup(app!, startMatch, showHome);
 }
 
 function showLearn(): void {
   clearScreen();
-  cleanup = renderLearn(app!, showMenu);
+  cleanup = renderLearn(app!, showHome);
 }
 
 function showWifi(): void {
@@ -75,17 +89,17 @@ function showWifi(): void {
   cleanup = renderLobby(app!, {
     onHost: (netHost, players) => {
       clearScreen();
-      const mode = new LocalWifiHost(app!, netHost, players, sfx, showMenu);
+      const mode = new LocalWifiHost(app!, netHost, players, sfx, showHome);
       mode.start();
       cleanup = () => mode.dispose();
     },
     onClient: (netClient, myPlayerId, reset) => {
       clearScreen();
-      const mode = new LocalWifiClient(app!, netClient, myPlayerId, reset, showMenu);
+      const mode = new LocalWifiClient(app!, netClient, myPlayerId, reset, showHome);
       mode.start();
       cleanup = () => mode.dispose();
     },
-    onExit: showMenu,
+    onExit: showHome,
   });
 }
 
@@ -98,7 +112,7 @@ function startMatch(setup: MatchSetup): void {
 
 function exitMatch(mode: SameDeviceMode): void {
   const rounds = mode.roundsPlayed;
-  showMenu();
+  showHome();
   // Honest inverse of a "rate us!" nag: optional, one-tap, once per session,
   // never blocks anything, stores nothing. Only after a real session of play.
   if (rounds >= 2 && !reflectionShown) {
@@ -119,7 +133,17 @@ function exitMatch(mode: SameDeviceMode): void {
   }
 }
 
-showMenu();
+// PWA shortcut ("Learn" on the home-screen icon's long-press menu) deep-links here.
+const wanted = new URLSearchParams(location.search).get('screen');
+if (wanted === 'learn') {
+  homeMode = 2;
+  showLearn();
+} else if (wanted === 'wifi') {
+  homeMode = 1;
+  showWifi();
+} else {
+  showHome();
+}
 
 // Dev-only headless harness for evaluating bot strength (stripped from prod).
 const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV;
