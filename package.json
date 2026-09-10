@@ -11,9 +11,14 @@
     "typecheck": "tsc --noEmit",
     "generate-icons": "pwa-assets-generator",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:android": "tsc --noEmit && vite build --config vite.config.android.ts",
+    "android:sync": "npm run build:android && cap sync android",
+    "android:open": "npm run android:sync && cap open android"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.1",
     "@vite-pwa/assets-generator": "^1.0.2",
     "typescript": "^5.5.4",
     "vite": "^5.4.2",
@@ -21,6 +26,8 @@
     "vitest": "^2.0.5"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
     "peerjs": "^1.5.5"
   }
 }

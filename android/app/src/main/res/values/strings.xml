@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Wiggle Wars</string>
+    <string name="title_activity_main">Wiggle Wars</string>
+    <string name="package_name">au.baref00t.wigglewars</string>
+    <string name="custom_url_scheme">au.baref00t.wigglewars</string>
+</resources>
