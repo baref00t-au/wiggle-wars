@@ -1,0 +1,48 @@
+{
+  "packageId": "au.baref00t.wigglewars.twa",
+  "host": "baref00t-au.github.io",
+  "name": "Wiggle Wars",
+  "launcherName": "Wiggle Wars",
+  "display": "fullscreen",
+  "themeColor": "#0F1512",
+  "themeColorDark": "#0F1512",
+  "navigationColor": "#0F1512",
+  "navigationColorDark": "#0F1512",
+  "navigationDividerColor": "#0F1512",
+  "navigationDividerColorDark": "#0F1512",
+  "backgroundColor": "#0F1512",
+  "enableNotifications": false,
+  "startUrl": "/wiggle-wars/",
+  "iconUrl": "https://baref00t-au.github.io/wiggle-wars/pwa-512x512.png",
+  "maskableIconUrl": "https://baref00t-au.github.io/wiggle-wars/maskable-icon-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:/Users/LacoVosika/.bubblewrap/wiggle-wars.keystore",
+    "alias": "wigglewars"
+  },
+  "appVersionName": "0.1.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://baref00t-au.github.io/wiggle-wars/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://baref00t-au.github.io/wiggle-wars/",
+  "minSdkVersion": 21,
+  "orientation": "landscape",
+  "fingerprints": [
+    {
+      "name": "release",
+      "value": "F9:F8:13:73:60:1C:A5:ED:25:A9:1E:6F:D7:C0:DE:DE:B9:E6:AB:CC:B6:FD:70:D6:D0:83:AB:EF:74:D0:C5:56"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "0.1.0"
+}

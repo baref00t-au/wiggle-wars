@@ -6,3 +6,13 @@ dist/
 dist-android/
 android/app/src/main/assets/public/
 android/app/src/main/assets/capacitor.config.json
+
+# Bubblewrap (TWA) build outputs; twa-manifest.json is the source of truth
+twa/app/build/
+twa/.gradle/
+twa/build/
+twa/*.apk
+twa/*.aab
+twa/*.idsig
+twa/local.properties
+twa/*.keystore

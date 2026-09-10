@@ -134,7 +134,14 @@ export function renderHome(container: HTMLElement, opts: HomeOptions): () => voi
   next.addEventListener('click', () => goTo((index + 1) % n));
   pager.append(prev, dots, next);
 
-  wrap.append(bar, viewport, pager, el('div', 'home-foot', 'NO ACCOUNTS · NO ADS · WORKS OFFLINE'));
+  // Footer: the ethics line, plus the Android APK (a Trusted Web Activity wrapper
+  // of this site, published as a GitHub release; see README "Android app").
+  const foot = el('div', 'home-foot');
+  const apk = el('a', 'home-foot-link', 'ANDROID APP');
+  apk.href = 'https://github.com/baref00t-au/wiggle-wars/releases/latest/download/wiggle-wars.apk';
+  apk.title = 'Download the Android app (APK)';
+  foot.append('NO ACCOUNTS · NO ADS · WORKS OFFLINE · ', apk);
+  wrap.append(bar, viewport, pager, foot);
 
   function setTrack(offsetPx = 0, animate = true): void {
     track.style.transition = animate ? '' : 'none';
