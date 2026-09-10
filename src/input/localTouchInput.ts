@@ -19,7 +19,10 @@ const CORNER_SEATS = ['seat-bl', 'seat-br', 'seat-tl flipped', 'seat-tr flipped'
 const EDGE_SEATS = ['seat-bl', 'seat-br', 'seat-l', 'seat-r'];
 
 function seatsFor(n: number, layout: PadLayout): string[] {
-  if (n <= 1) return ['seat-bc'];
+  // A lone human (vs bots, or a WiFi client) gets a split pad: left-turn zone in
+  // the bottom-left corner, right-turn zone in the bottom-right — one per thumb,
+  // with the pause button sitting between them.
+  if (n <= 1) return ['seat-split'];
   return (layout === 'edges' ? EDGE_SEATS : CORNER_SEATS).slice(0, n);
 }
 
