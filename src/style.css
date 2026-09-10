@@ -1621,6 +1621,21 @@ textarea {
   top: 12px;
 }
 
+/* Single local player: one zone per thumb, spanning the bottom edge. */
+.pad.seat-split {
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  justify-content: space-between;
+  padding: 0;
+  background: transparent;
+}
+
+.pad.seat-split .pad-zone {
+  background-color: var(--pad-ground);
+  border-radius: 10px;
+}
+
 /* Far-side players (top row of the corner layout) — rotate so the arrows
    and name read right-way-up from across a flat tablet. */
 .pad.flipped {
