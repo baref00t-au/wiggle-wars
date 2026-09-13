@@ -70,7 +70,9 @@ export function renderHome(container: HTMLElement, opts: HomeOptions): () => voi
   // ----- top bar -----
   const bar = el('div', 'home-bar');
   const wordmark = el('div', 'wordmark');
-  wordmark.append(el('span', 'wordmark-name', 'WIGGLE WARS'), el('span', 'wordmark-ver', 'v4'));
+  // "v0.4": major.minor of the package version.
+  const ver = 'v' + __APP_VERSION__.split('.').slice(0, 2).join('.');
+  wordmark.append(el('span', 'wordmark-name', 'WIGGLE WARS'), el('span', 'wordmark-ver', ver));
   const sound = el('button', 'sound-btn', opts.muted ? '🔇' : '🔊');
   sound.title = 'Sound on / off';
   sound.setAttribute('aria-label', 'Sound on / off');

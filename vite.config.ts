@@ -1,8 +1,11 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { version } from './package.json';
 
 export default defineConfig(({ command }) => ({
+  // Surfaced in the home wordmark ("v0.4"); single source of truth is package.json.
+  define: { __APP_VERSION__: JSON.stringify(version) },
   // GitHub Pages serves this project site under /wiggle-wars/; dev/preview use root.
   base: command === 'build' ? '/wiggle-wars/' : '/',
   // The game ships as plain static files — keep the build boring on purpose.

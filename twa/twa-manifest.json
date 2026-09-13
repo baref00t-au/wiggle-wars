@@ -20,8 +20,8 @@
     "path": "C:/Users/LacoVosika/.bubblewrap/wiggle-wars.keystore",
     "alias": "wigglewars"
   },
-  "appVersionName": "0.1.0",
-  "appVersionCode": 1,
+  "appVersionName": "0.4.0",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://baref00t-au.github.io/wiggle-wars/manifest.webmanifest",
@@ -44,5 +44,5 @@
   ],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
-  "appVersion": "0.1.0"
+  "appVersion": "0.4.0"
 }
